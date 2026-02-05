@@ -1,0 +1,25 @@
+{%- assign url = '/objects/' | append: include.post.object_location | default: '' -%}
+{%- if url != '' -%}
+  <div class="post-audio w-full mb-4" style="width:100%;max-width:880px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;gap:.5rem;">
+      <div style="flex:1;overflow:hidden;">
+        <strong>{{ include.post.title }}</strong>
+        {% if include.post.author_name %}
+          <div style="font-size:.85rem;color:rgba(0,0,0,0.6);">{{ include.post.author_name }}</div>
+        {% endif %}
+      </div>
+      <div style="flex:0 0 auto;margin-left:.5rem;">
+        <a href="{{ url | relative_url }}" target="_blank" rel="noopener noreferrer" class="inline-block text-sm text-blue-600 hover:underline">Open in new tab</a>
+      </div>
+    </div>
+
+    <div style="width:100%;border:1px solid rgba(0,0,0,0.06);border-radius:8px;padding:.75rem;background:transparent;">
+      <audio controls preload="metadata" style="width:100%;display:block;outline:none;">
+        <source src="{{ url | relative_url }}">
+        Your browser does not support the audio element. <a href="{{ url | relative_url }}">Download audio</a>
+      </audio>
+    </div>
+  </div>
+{%- else -%}
+  <!-- no audio URL provided -->
+{%- endif -%}

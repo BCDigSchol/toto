@@ -1,0 +1,68 @@
+{%- assign share = include.post.object_location | default: '' | strip -%}
+{%- comment -%}
+  Accepts YouTube share links (youtu.be/ID or full youtube.com/watch?v=ID or embed URL) and renders
+  a styled thumbnail with play overlay. Clicking replaces it with an iframe (lazy load).
+{%- endcomment -%}
+{%- assign video_id = '' -%}
+{%- if share contains 'youtu.be/' -%}
+  {%- assign parts = share | split: '/' -%}
+  {%- assign video_id = parts.last | split: '?' | first -%}
+{%- elsif share contains 'watch?v=' -%}
+  {%- assign q = share | split: 'watch?v=' -%}
+  {%- assign video_id = q[1] | split: '&' | first -%}
+{%- elsif share contains '/embed/' -%}
+  {%- assign parts = share | split: '/embed/' -%}
+  {%- assign video_id = parts[1] | split: '?' | first -%}
+{%- else -%}
+  {%- assign video_id = share | split: '/' | last | split: '?' | first -%}
+{%- endif -%}
+
+{%- if video_id != '' -%}
+  {%- assign thumb = 'https://i.ytimg.com/vi/' | append: video_id | append: '/hqdefault.jpg' -%}
+  <div class="post-youtube w-full mb-4" style="width:100%;max-width:880px;">
+    <div style="position:relative;border-radius:8px;overflow:hidden;border:1px solid rgba(0,0,0,0.06);">
+      <a href="https://www.youtube.com/watch?v={{ video_id }}" target="_blank" rel="noopener noreferrer" style="position:absolute;right:8px;top:8px;z-index:6;background:rgba(0,0,0,0.5);color:#fff;padding:.35rem .5rem;border-radius:6px;font-size:.85rem;text-decoration:none;">Open on YouTube</a>
+
+      <div class="yt-placeholder" data-video-id="{{ video_id }}" style="cursor:pointer;position:relative;padding-top:56.25%;background:#000;display:block;">
+        <img src="{{ thumb }}" alt="YouTube thumbnail" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;" />
+        <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;display:flex;align-items:center;justify-content:center;">
+          <div style="width:84px;height:84px;background:rgba(0,0,0,0.55);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7-11-7z" fill="#ffffff"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function(){
+      function initYouTubePlaceholders(){
+        var placeholders = document.querySelectorAll('.yt-placeholder');
+        Array.prototype.forEach.call(placeholders, function(ph){
+          if (ph.getAttribute('data-yt-initialized')) return;
+          ph.addEventListener('click', function(){
+            var id = ph.getAttribute('data-video-id');
+            if (!id) return;
+            var iframe = document.createElement('iframe');
+            iframe.setAttribute('src', 'https://www.youtube.com/embed/' + id + '?rel=0&modestbranding=1&autoplay=1');
+            iframe.setAttribute('frameborder', '0');
+            iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+            iframe.setAttribute('allowfullscreen', '');
+            iframe.style.position = 'absolute';
+            iframe.style.top = '0';
+            iframe.style.left = '0';
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            // replace placeholder content with iframe
+            ph.innerHTML = '';
+            ph.appendChild(iframe);
+            ph.setAttribute('data-yt-initialized', '1');
+          });
+          ph.setAttribute('data-yt-initialized','0');
+        });
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initYouTubePlaceholders); else initYouTubePlaceholders();
+    })();
+  </script>
+{%- else -%}
+  <!-- invalid youtube url -->
+{%- endif -%}

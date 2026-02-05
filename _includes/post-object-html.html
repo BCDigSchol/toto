@@ -1,0 +1,11 @@
+{%- assign content_raw = include.post.object_location | default: '' -%}
+{%- if content_raw != '' -%}
+  <div class="post-html w-full mb-4" style="width:100%;max-width:880px;padding:1rem;border-radius:8px;border:1px solid rgba(0,0,0,0.06);background:transparent;">
+    {%- comment -%}
+      Render `object_location` as HTML. Caller is responsible for providing safe HTML.
+    {%- endcomment -%}
+    {{ content_raw | strip | safe }}
+  </div>
+{%- else -%}
+  <!-- no html/text content provided -->
+{%- endif -%}

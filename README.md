@@ -15,5 +15,6 @@ Share information, videos, images, and links about Digital Scholarship in a soci
 * `git clone` this repo and then `cd` inside the directory
 * Comment out the `url` and `baseurl` lines of `_config.yml` when working locally
 * Install Ruby dependencies by running `bundle install`
+* Make transcoder script executable `chmod +x ./scripts/transcode_videos.sh`
 * Transcode any videos by running `./scripts/transcode_videos.sh`
 * Run the server with `bundle exec jekyll serve`

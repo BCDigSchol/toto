@@ -1,17 +1,44 @@
-<article class="post-item w-full max-w-3xl box-border mb-8 p-4 border rounded-lg shadow-sm" style="width:100%; max-width:880px;">
+{%- assign files_raw = include.post.object_location | default: '' -%}
+{%- assign captions_raw = include.post.caption | default: '' -%}
+<article class="post-item w-full max-w-3xl box-border mb-8 p-4 border rounded-lg shadow-sm" style="width:100%; max-width:880px;"
+  data-subjects="{{ include.post.subjects | default: '' | downcase | escape }}"
+  data-title="{{ include.post.title | default: '' | downcase | escape }}"
+  data-files="{{ files_raw | downcase | escape }}"
+  data-description="{{ include.post.description | default: '' | downcase | escape }}"
+  data-captions="{{ captions_raw | downcase | escape }}"
+  data-author="{{ include.post.author_name | default: '' | append: ' ' | append: include.post.author_last_initial | append: ' ' | append: include.post.author_department | downcase | escape }}"
+  data-author-first="{{ include.post.author_name | default: '' | downcase | escape }}"
+  data-author-last-initial="{{ include.post.author_last_initial | default: '' | downcase | escape }}"
+  data-author-department="{{ include.post.author_department | default: '' | downcase | escape }}">
   {% include post-header.html post=include.post %}
 
   {%- if include.post.object_type == "image" -%}
     {% include post-object-image.html post=include.post %}
   {%- elsif include.post.object_type == "video" -%}
     {% include post-object-video.html post=include.post %}
+  {%- elsif include.post.object_type == "audio" -%}
+    {% include post-object-audio.html post=include.post %}
+  {%- elsif include.post.object_type == "pdf" -%}
+    {% include post-object-pdf.html post=include.post %}
+  {%- elsif include.post.object_type == "text" or include.post.object_type == "html" -%}
+    {% include post-object-html.html post=include.post %}
+  {%- elsif include.post.object_type == "youtube" -%}
+    {% include post-object-youtube.html post=include.post %}
+  {%- elsif include.post.object_type == "direct-link" -%}
+    {% include post-object-direct-link.html post=include.post %}
+  {%- elsif include.post.object_type == "gallery" -%}
+    {% include post-object-gallery.html post=include.post %}
+  {%- else -%}
+    {%- if include.post.object_location -%}
+      {% include post-object-image.html post=include.post %}
+    {%- endif -%}
   {%- endif -%}
 
   <div class="post-title-row w-full flex items-center justify-between mb-2">
     <h2 class="post-title text-2xl font-bold flex-1">
       <a href="{{ '/post' | append: '/' | append: include.post.id | relative_url }}" class="text-inherit no-underline">{{ include.post.title }}</a>
     </h2>
-    <a href="#" class="post-share text-gray-600 hover:text-gray-800" title="Share" aria-label="Share">
+    <a href="{{ '/post' | append: '/' | append: include.post.id | relative_url }}" class="post-share text-gray-600 hover:text-gray-800" title="Share" aria-label="Share">
       <i class="fas fa-share" aria-hidden="true"></i>
     </a>
   </div>
@@ -21,6 +48,24 @@
   {% endif %}
 
   <footer class="post-meta text-sm text-gray-600">
-    <p><strong>Subjects:</strong> {{ include.post.subjects }}</p>
+    {%- assign subjects_raw = include.post.subjects | default: "" | replace: ';', ',' | split: ',' -%}
+    {%- assign has_subs = false -%}
+    {%- for s in subjects_raw -%}
+      {%- if s | strip != "" -%}
+        {%- assign has_subs = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if has_subs -%}
+      <div style="display:flex;flex-wrap:wrap;gap:.4rem;align-items:center">
+        <strong style="margin-right:.5rem;">Subjects:</strong>
+        {%- for s in subjects_raw -%}
+          {%- assign sub = s | strip -%}
+          {%- if sub != "" -%}
+            <a href="{{ site.baseurl }}?subject={{ sub | uri_escape }}" class="subject-chip" style="display:inline-flex;align-items:center;padding:.25rem .6rem;border-radius:999px;background:#f1f5f9 !important;color:#0f172a !important;text-decoration:none !important;border:1px solid rgba(0,0,0,0.04) !important;box-shadow:0 2px 8px rgba(0,0,0,0.04) !important;font-size:.85rem;">{{ sub }}</a>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
   </footer>
 </article>

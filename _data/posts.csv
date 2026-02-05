@@ -1,4 +1,10 @@
-id,object_location,object_type,title,description,caption,author_name,author_last_initial,author_avatar,author_department,subjects,discipline,method
+id,object_location,object_type,title,description,caption,author_name,author_last_initial,author_avatar,author_department,subjects
 1,dh-test.jpg,image,"Test Image","This is just a test image","Test image, ignore","Dave","T","dave-t.png","Digital Scholarship","Testing"
 2,test.jpg,image,"Test Image","This is just a test image","Test image, ignore","Melanie","H",,"Digital Scholarship","Testing"
-3,test.mp4,video,"Test Video","This is just a test video","Test video, ignore","Melanie","H",,"Digital Scholarship","Testing"
+3,test.mp4,video,"Test Video","This is just a test video","Test video, ignore","Melanie","H",,"Digital Scholarship","Testing;Digital Scholarship"
+4,dh-test.jpg;test.jpg;dh-test.jpg;test.jpg,gallery,"Test Gallery","This is just a test gallery","Test gallery, ignore;Test;Test;test","Dave","T","dave-t.png","Digital Scholarship","Testing;Tests"
+5,https://theport.us/,direct-link,"External Link","This is an external link","Visit The Port","Dave","T","dave-t.png","Digital Scholarship","Links"
+6,test.mp3,audio,"Test Audio","This is just a test audio file","Test audio, ignore","Melanie","H",,"Digital Scholarship","Audio;Testing"
+7,<bold>Hello World<br/>This is a test,html,"Test HTML","This is a test HTML content","Test HTML content, ignore","Dave","T","dave-t.png","Digital Scholarship","HTML;Testing"
+8,https://www.youtube.com/watch?v=t6wAyr945po&list=PLFUPK3hS97eaUkz53OfzBnjNL_Xy6IV-5,youtube,"Test YouTube Video","This is a test YouTube video","Test YouTube video, ignore","Melanie","H",,"Digital Scholarship","Video;YouTube"
+9,test.pdf,pdf,"Test PDF","This is just a test PDF file","Test PDF, ignore","Dave","T","dave-t.png","Digital Scholarship","PDF;Testing"

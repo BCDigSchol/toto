@@ -50,3 +50,271 @@ layout: page
     });
   })();
 </script>
+
+<script>
+  (function(){
+    // Share button: copy item URL to clipboard and show a toast
+    try {
+      var container = document.querySelector('.posts-container');
+      if (!container) return;
+
+      function showToast(msg, x, y){
+        var toast = document.getElementById('share-toast');
+        if (!toast){
+          toast = document.createElement('div');
+          toast.id = 'share-toast';
+          toast.style.position = 'fixed';
+          toast.style.zIndex = '10000';
+          toast.style.padding = '0.45rem .75rem';
+          toast.style.background = '#9f5252';
+          toast.style.color = '#fff';
+          toast.style.borderRadius = '6px';
+          toast.style.fontSize = '0.95rem';
+          toast.style.boxShadow = '0 6px 20px rgba(2,6,23,0.4)';
+          toast.style.transition = 'opacity .18s ease, transform .18s ease';
+          toast.style.opacity = '0';
+          document.body.appendChild(toast);
+        }
+        toast.textContent = msg;
+        // if coordinates provided, position above the button; otherwise center bottom
+        if (typeof x === 'number' && typeof y === 'number'){
+          toast.style.left = x + 'px';
+          toast.style.top = (y - 8) + 'px';
+          toast.style.bottom = '';
+          toast.style.transform = 'translate(-50%, -100%)';
+        } else {
+          toast.style.left = '50%';
+          toast.style.bottom = '2rem';
+          toast.style.top = '';
+          toast.style.transform = 'translateX(-50%)';
+        }
+        toast.style.opacity = '1';
+        if (toast._hideTimeout) clearTimeout(toast._hideTimeout);
+        toast._hideTimeout = setTimeout(function(){ toast.style.opacity = '0'; }, 2000);
+      }
+
+      container.addEventListener('click', function(e){
+        var btn = e.target.closest && e.target.closest('.post-share');
+        if (!btn) return;
+        e.preventDefault();
+        var article = btn.closest && btn.closest('.post-item');
+        if (!article) return;
+        var titleLink = article.querySelector('.post-title a');
+        if (!titleLink) return;
+        var href = titleLink.getAttribute('href') || '';
+        var url = href.match(/^https?:\/\//) ? href : (window.location.origin + (href.charAt(0) === '/' ? href : '/' + href));
+
+        function fallbackCopy(){
+          var ta = document.createElement('textarea'); ta.value = url; ta.style.position='fixed'; ta.style.left='-9999px'; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); showToast('Link copied to clipboard'); } catch(err){ showToast('Unable to copy'); }
+          document.body.removeChild(ta);
+        }
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(function(){
+            var rect = btn.getBoundingClientRect();
+            var centerX = rect.left + rect.width/2;
+            var topY = rect.top;
+            showToast('Link copied to clipboard', centerX, topY);
+          }).catch(function(){ fallbackCopy(); });
+        } else {
+          fallbackCopy();
+        }
+      });
+
+    } catch(e) { /* ignore */ }
+  })();
+</script>
+
+<script>
+  (function(){
+    // Client-side filtering: supports ?subject=, ?search=, ?author_name= and ?author_last_initial=.
+    // All provided filters apply with AND semantics.
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var subjectParam = params.get('subject');
+      var searchParam = params.get('search');
+      var authorNameParam = params.get('author_name');
+      var authorLastInitialParam = params.get('author_last_initial');
+      var authorDepartmentParam = params.get('author_department');
+
+      var subject = subjectParam ? subjectParam.toLowerCase() : null;
+      var search = searchParam ? searchParam.toLowerCase() : null;
+      var authorName = authorNameParam ? authorNameParam.toLowerCase() : null;
+      var authorLastInitial = authorLastInitialParam ? authorLastInitialParam.toLowerCase() : null;
+      var authorDepartment = authorDepartmentParam ? authorDepartmentParam.toLowerCase() : null;
+
+      var searchTokens = [];
+      if (search) {
+        searchTokens = search.split(/\s+/).filter(function(t){ return t.length; });
+      }
+
+      var container = document.querySelector('.posts-container');
+      if (!container) return;
+      var items = Array.prototype.slice.call(container.querySelectorAll('.post-item'));
+      var anyVisible = false;
+
+      items.forEach(function(item){
+        var subjects = (item.getAttribute('data-subjects') || '').toLowerCase();
+        var title = (item.getAttribute('data-title') || '').toLowerCase();
+        var files = (item.getAttribute('data-files') || '').toLowerCase();
+        var desc = (item.getAttribute('data-description') || '').toLowerCase();
+        var caps = (item.getAttribute('data-captions') || '').toLowerCase();
+        var author = (item.getAttribute('data-author') || '').toLowerCase();
+        var authorFirst = (item.getAttribute('data-author-first') || '').toLowerCase();
+        var authorLastInitialToken = (item.getAttribute('data-author-last-initial') || '').toLowerCase();
+        var authorDeptToken = (item.getAttribute('data-author-department') || '').toLowerCase();
+        var authorFirst = (item.getAttribute('data-author-first') || '').toLowerCase();
+        var authorLastInitialToken = (item.getAttribute('data-author-last-initial') || '').toLowerCase();
+        var authorDeptToken = (item.getAttribute('data-author-department') || '').toLowerCase();
+
+        var subjectMatches = true;
+        if (subject) {
+          subjectMatches = false;
+          var tokens = subjects.split(/[,;]+/).map(function(t){ return t.trim(); });
+          for (var i=0;i<tokens.length;i++){ if (tokens[i] === subject) { subjectMatches = true; break; } }
+        }
+
+        var searchMatches = true;
+        if (searchTokens.length) {
+          searchMatches = false;
+          // if any token appears in any searchable field, count as a match
+          for (var t=0;t<searchTokens.length;t++){
+            var tok = searchTokens[t];
+            if (!tok) continue;
+            if (title.indexOf(tok) !== -1 || files.indexOf(tok) !== -1 || desc.indexOf(tok) !== -1 || caps.indexOf(tok) !== -1 || subjects.indexOf(tok) !== -1 || author.indexOf(tok) !== -1) {
+              searchMatches = true;
+              break;
+            }
+          }
+        }
+
+        var authorMatches = true;
+        if (authorName) {
+          authorMatches = false;
+          // Prefer explicit data-author-first if available
+          if (authorFirst) {
+            if (authorFirst === authorName || authorFirst.indexOf(authorName) === 0) authorMatches = true;
+          } else {
+            var authorParts = author.split(/\s+/).filter(function(s){ return s.length; });
+            if (authorParts.length) {
+              var firstName = authorParts[0];
+              if (firstName === authorName || firstName.indexOf(authorName) === 0) {
+                authorMatches = true;
+              }
+            }
+          }
+        }
+        if (authorLastInitial) {
+          var lastInitialMatch = false;
+          // Prefer explicit data-author-last-initial if present
+          if (authorLastInitialToken) {
+            if (authorLastInitialToken === authorLastInitial) lastInitialMatch = true;
+          } else {
+            var authorParts2 = author.split(/\s+/).filter(function(s){ return s.length; });
+            for (var p=0;p<authorParts2.length;p++){
+              var tok = authorParts2[p];
+              if (tok.length === 1) {
+                if (tok.toLowerCase() === authorLastInitial) { lastInitialMatch = true; break; }
+              }
+            }
+          }
+          authorMatches = authorMatches && lastInitialMatch;
+        }
+
+        var authorDeptMatches = true;
+        if (authorDepartment) {
+          authorDeptMatches = false;
+          if (authorDeptToken) {
+            if (authorDeptToken === authorDepartment || authorDeptToken.indexOf(authorDepartment) !== -1) authorDeptMatches = true;
+          } else {
+            // fallback: check in combined author string
+            if (author.indexOf(authorDepartment) !== -1) authorDeptMatches = true;
+          }
+        }
+
+        // mark whether this item matched the current filters
+        if (subjectMatches && searchMatches && authorMatches && authorDeptMatches) {
+          item.dataset.filtered = 'true';
+          item.style.display = '';
+          anyVisible = true;
+        } else {
+          item.dataset.filtered = 'false';
+          item.style.display = 'none';
+        }
+      });
+      // Pagination / progressive reveal: show only the first N matched items initially
+      var INITIAL_SHOW = 10;
+      var LOAD_BATCH = 5;
+      function applyPagination(){
+        var shown = 0;
+        items.forEach(function(it){
+          if (it.dataset.filtered === 'true' || (subject===null && search===null && authorName===null && authorLastInitial===null && authorDepartment===null)){
+            if (shown < INITIAL_SHOW) {
+              it.style.display = '';
+              shown++;
+            } else {
+              // hide for now; will be revealed by intersection observer
+              it.style.display = 'none';
+            }
+          } else {
+            // keep hidden if filtered out
+            it.style.display = 'none';
+          }
+        });
+
+        // if nothing is visible after filters, show a message
+        if (!Array.prototype.slice.call(items).some(function(it){ return it.style.display !== 'none'; })){
+          var msg = document.createElement('div');
+          msg.className = 'no-results';
+          msg.style.padding = '1rem';
+          msg.style.color = '#334155';
+          var parts = [];
+          if (searchParam) parts.push(searchParam);
+          if (subjectParam) parts.push(subjectParam);
+          if (authorNameParam) parts.push('author: ' + authorNameParam);
+          if (authorLastInitialParam) parts.push('last initial: ' + authorLastInitialParam);
+          if (authorDepartmentParam) parts.push('department: ' + authorDepartmentParam);
+          var q = parts.join(' ');
+          msg.textContent = 'No posts found for "' + q + '".';
+          container.parentNode.insertBefore(msg, container);
+        }
+      }
+
+      applyPagination();
+
+      // IntersectionObserver to progressively reveal more items
+      var sentinel = document.createElement('div');
+      sentinel.id = 'posts-sentinel';
+      sentinel.style.width = '100%';
+      sentinel.style.height = '1px';
+      container.parentNode.appendChild(sentinel);
+
+      function revealMore(){
+        var toReveal = [];
+        for (var i=0;i<items.length;i++){
+          var it = items[i];
+          if ((it.dataset.filtered === 'true' || (subject===null && search===null && authorName===null && authorLastInitial===null && authorDepartment===null)) && it.style.display === 'none'){
+            toReveal.push(it);
+            if (toReveal.length >= LOAD_BATCH) break;
+          }
+        }
+        toReveal.forEach(function(it){ it.style.display = ''; });
+      }
+
+      // create observer
+      var observer = null;
+      try {
+        observer = new IntersectionObserver(function(entries){
+          entries.forEach(function(entry){
+            if (entry.isIntersecting) {
+              revealMore();
+            }
+          });
+        }, { root: null, rootMargin: '200px', threshold: 0 });
+        observer.observe(sentinel);
+      } catch(e) { /* ignore if not supported */ }
+
+    } catch(e) { /* fail silently */ }
+  })();
+</script>

@@ -1,86 +1,56 @@
-<header class="w-full flex flex-col justify-start items-center">
-    <!-- medium to larger screens header (invisible on mobile) -->
-    <div class="normal-header w-full header-container card flex-col justify-center items-center">
-        <img src="{{ 'assets/img/' | append: site.logo | relative_url }}" alt="{{ site.title }} logo" />
-        <div class="my-3 w-full title-font p-2 text-center flex flex-col justify-center items-center">
-            <a class="tracking-widest" href="{{site.baseurl}}/">
-                {{ site.title }}
-            </a>
-        </div>
-        
-        <div class="nav-bar w-full flex flex-row justify-around items-center py-4 px-10 header-nav-bar">
-            {% for menu_item in site.nav-menu %}
-                <!-- put dropdown container if submenu exists -->
-                {% if menu_item.submenu %}
-                    <div class="dropdown">
-                {% endif %}
-                <span>
-                    {% if menu_item.link %}
-                        <a href="{{ menu_item.link | relative_url }}">
-                            {{ menu_item.title }}
-                        </a>
-                    {% elsif menu_item.external-link %}
-                        <a href="{{ menu_item.external-link }}">
-                            {{ menu_item.title }}
-                        </a>
-                    {% else %}
-                        {{ menu_item.title }}
-                    {% endif %}
-                    </span>
-                {% if menu_item.submenu %}
-                    <div class="dropdown-content">
-                        {% for submenu_item in menu_item.submenu %}
-                            {% if submenu_item.link %}
-                            <a href="{{ submenu_item.link | relative_url }}">
-                                {{ submenu_item.title }}
-                            </a>
-                            {% elsif submenu_item.external-link %}
-                            <a href="{{ submenu_item.external-link }}">
-                                {{ submenu_item.title }}
-                            </a>
-                            {% else %}
-                                {{ submenu_item.title }}
-                            {% endif %}
-                            {% if forloop.last == false %}
-                                <hr />
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                {% endif %}
-                <!-- close dropdown container -->
-                {% if menu_item.submenu %}
-                    </div>
-                {% endif %}
-            {% endfor %}
-        </div>
+<header class="w-full">
+  <!-- Desktop / tablet header -->
+  <div class="normal-header w-full header-container card flex-col justify-center items-center">
+    <div class="flex flex-row justify-center items-center gap-4 py-4">
+      <a href="{{ site.baseurl }}/" class="flex items-center gap-3">
+        <img src="{{ 'assets/img/' | append: site.logo | relative_url }}" alt="{{ site.title }} logo" height="48" width="48" style="border-radius:6px;" />
+        <span class="title-font tracking-widest">{{ site.title }}</span>
+      </a>
+      <button id="theme-toggle-desktop" type="button" class="theme-toggle" aria-label="Toggle dark theme" title="Toggle theme" onclick="console.log('theme-desktop inline click')" style="margin-left:8px;background:transparent;border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:6px;cursor:pointer;color:inherit;pointer-events:auto;">
+        <i class="fa-solid fa-moon"></i>
+      </button>
     </div>
-    <!-- xs to small screens (mobile, invisible to desktop) -->
-    <div class="mobile-header w-full header-container card flex-row justify-start items-center p-2">
-        <div class="title-font">
-            <a class="tracking-widest" href="{{site.baseurl}}/">
-                {{ site.title }}
-            </a>
-            <img src="{{ 'assets/img/' | append: site.logo }}" alt="{{ site.title }} logo" height="48px" width="48px"/>
+
+    <div class="mx-4">
+    <form id="global-search-form" style="margin-top:.5rem;width:100%;max-width:720px;display:flex;gap:.5rem;justify-content:center;">
+      <input id="search-input" name="search" type="search" placeholder="Search posts" aria-label="Search" style="flex:1;padding:.5rem .75rem;border-radius:8px;border:1px solid rgba(0,0,0,0.08);box-shadow:inset 0 1px 2px rgba(0,0,0,0.02);" />
+      <button type="submit" style="padding:.45rem .75rem;border-radius:8px;border:1px solid rgba(0,0,0,0.08);background:#0b5fff;color:#fff;cursor:pointer;">Search</button>
+    </form>
+    </div>
+
+
+    <nav class="nav-bar w-full flex flex-row justify-center items-center py-4 px-6 header-nav-bar">
+      {% for menu_item in site.nav-menu %}
+        <div class="mx-3">
+          {% if menu_item.link %}
+            <a href="{{ menu_item.link | relative_url }}">{{ menu_item.title }}</a>
+          {% elsif menu_item.external-link %}
+            <a href="{{ menu_item.external-link }}">{{ menu_item.title }}</a>
+          {% else %}
+            {{ menu_item.title }}
+          {% endif %}
         </div>
-        
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const dropdownButton = document.querySelector('.mobile-nav-dropdown-button');
-                const dropdownContent = document.querySelector('.nav-dropdown-content');
-        
-                dropdownButton.addEventListener('click', function () {
-                    dropdownContent.classList.toggle('show');
-                });
-        
-                // Optional: Close the dropdown if clicked outside
-                document.addEventListener('click', function (event) {
-                    if (!dropdownButton.contains(event.target) && !dropdownContent.contains(event.target)) {
-                        dropdownContent.classList.remove('show');
-                    }
-                });
-            });
-        </script>
-        <div class="mobile-nav-dropdown-button" data-toggle="dropdown">
+      {% endfor %}
+    </nav>
+  </div>
+
+  <!-- Mobile header -->
+  <div class="mobile-header w-full header-container card flex-row justify-between items-center p-2">
+    <a href="{{ site.baseurl }}/" class="flex items-center gap-2 flex-grow">
+      <img src="{{ 'assets/img/' | append: site.logo | relative_url }}" alt="{{ site.title }} logo" height="40" width="40" style="border-radius:6px;" />
+      <span class="title-font tracking-widest">{{ site.title }}</span>
+    </a>
+
+    <form id="mobile-search-form" style="display:flex;align-items:center;gap:.4rem;margin-left:8px;">
+      <input id="mobile-search-input" name="search" type="search" placeholder="Search" aria-label="Search" style="padding:.35rem .5rem;border-radius:6px;border:1px solid rgba(0,0,0,0.08);width:140px;box-sizing:border-box;" />
+      <button type="submit" style="padding:.35rem .5rem;border-radius:6px;border:1px solid rgba(0,0,0,0.08);background:#0b5fff;color:#fff;cursor:pointer;">Go</button>
+    </form>
+    <button id="theme-toggle-mobile" type="button" class="theme-toggle" aria-label="Toggle dark theme" title="Toggle theme" onclick="console.log('theme-mobile inline click')" style="margin-left:8px;background:transparent;border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:6px;cursor:pointer;color:inherit;pointer-events:auto;">
+      <i class="fa-solid fa-moon"></i>
+    </button>
+
+    
+        <div class="ml-5 mr-2 mobile-nav-dropdown-button" data-toggle="dropdown">
             <i class="fa-solid fa-bars"></i>
 
             <div class="nav-dropdown-content text-center flex flex-col justify-start items-center">
@@ -120,7 +90,9 @@
                                     <hr />
                                 {% endif %}
                             {% endfor %}
-                        </div>
+                            </div>
+
+                    {% comment %} style+script moved to footer of header to avoid being inside the loop {% endcomment %}
                     {% endif %}
                     <!-- close dropdown container -->
                     {% if menu_item.submenu %}
@@ -131,6 +103,127 @@
                     {% endif %}
                 {% endfor %}
             </div>
-        </div>
-    </div>
+
+    <!-- consolidated dark theme styles and scripts (placed after nav loop) -->
+    <style>
+      /* Dark theme: apply broadly to site wrapper and content so white space also goes dark */
+      body.dark-theme { background-color:#0b0b0d !important; color:#e6e6e6 !important; }
+      body.dark-theme .site-wrapper,
+      body.dark-theme .content-container,
+      body.dark-theme .content-wrapper { background-color: #0b0b0d !important; }
+
+      /* Header, footer, panels */
+      body.dark-theme .header-container,
+      body.dark-theme .footer-container { background-color:#0f1720 !important; color:#e6e6e6 !important; }
+
+      /* Cards and posts */
+      body.dark-theme .card,
+      body.dark-theme .post-item { background-color:#0f1518 !important; border-color: rgba(255,255,255,0.04) !important; color:#e6e6e6 !important; box-shadow: none !important; }
+
+      /* Borders and containers */
+      body.dark-theme .content-container { border-color: rgba(255,255,255,0.06) !important; }
+
+      /* Navigation / links */
+      body.dark-theme a, body.dark-theme header a, body.dark-theme .title-font, body.dark-theme .nav-bar a { color:#9fb4ff !important; }
+      body.dark-theme .nav-dropdown-content,
+      body.dark-theme .mobile-nav-panel { background-color:#11151a !important; color:#e6e6e6 !important; }
+
+      /* Forms */
+      body.dark-theme input, body.dark-theme textarea, body.dark-theme select { background-color:#0f1416 !important; color:#e6e6e6 !important; border-color: rgba(255,255,255,0.06) !important; }
+
+      /* Small niceties */
+      .theme-toggle { transition: opacity .12s ease; }
+    </style>
+
+    <style>
+      /* On large screens, keep the header column fixed (sticky) and make the main content scrollable
+         so the header background remains visible while posts scroll independently. */
+      @media screen and (min-width: 1024px) {
+        .site-layout { align-items: stretch; }
+        .site-layout > aside { position: -webkit-sticky; position: sticky; top: 0; height: 100vh; align-self: flex-start; z-index: 20; }
+        .site-layout > main { height: 100vh; overflow: auto; }
+        /* ensure the inner content container can scroll comfortably */
+        .site-layout > main .content-container { min-height: 100%; }
+      }
+    </style>
+    <style>
+      /* Ensure header fills full height on large screens while keeping its content top-aligned */
+      @media screen and (min-width: 1024px) {
+        /* make the header column span the viewport height */
+        .normal-header { min-height: 100vh !important; }
+
+        /* override any centering utilities so content stays top-aligned */
+        .normal-header { display:flex !important; flex-direction:column !important; justify-content:flex-start !important; align-items:stretch !important; }
+
+        /* keep the top row items centered horizontally but stuck to the top */
+        .normal-header > .flex { align-items:center; }
+
+        /* keep the nav visually near the top (don't push it to vertical center) */
+        .normal-header .nav-bar { margin-top: 0; }
+      }
+    </style>
+
+    <script>
+      (function(){
+        document.addEventListener('DOMContentLoaded', function(){
+          try {
+            console.log('header script init');
+
+            function submitSearch(ev, inputId){
+              ev && ev.preventDefault();
+              var inp = document.getElementById(inputId);
+              if (!inp) return;
+              var val = (inp.value || '').trim();
+              var params = new URLSearchParams(window.location.search);
+              if (val) params.set('search', val); else params.delete('search');
+              var newurl = window.location.pathname + (params.toString() ? ('?' + params.toString()) : '');
+              window.location.href = newurl;
+            }
+
+            var gform = document.getElementById('global-search-form');
+            if (gform) gform.addEventListener('submit', function(e){ submitSearch(e, 'search-input'); });
+            var mform = document.getElementById('mobile-search-form');
+            if (mform) mform.addEventListener('submit', function(e){ submitSearch(e, 'mobile-search-input'); });
+
+            var dropdownButton = document.querySelector('.mobile-nav-dropdown-button');
+            var dropdownContent = document.querySelector('.nav-dropdown-content');
+            if (dropdownButton && dropdownContent) {
+              dropdownButton.addEventListener('click', function () { dropdownContent.classList.toggle('show'); });
+              document.addEventListener('click', function (event) {
+                if (!dropdownButton.contains(event.target) && !dropdownContent.contains(event.target)) {
+                  dropdownContent.classList.remove('show');
+                }
+              });
+            }
+
+            // Theme toggle logic: sync all toggles, persist to localStorage
+            var toggles = Array.prototype.slice.call(document.querySelectorAll('.theme-toggle')) || [];
+            console.log('found theme toggles:', toggles.length);
+            function setThemeState(theme){
+              if (theme === 'dark') document.body.classList.add('dark-theme'); else document.body.classList.remove('dark-theme');
+              var icon = theme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+              toggles.forEach(function(btn){ btn.innerHTML = icon; });
+            }
+
+            var stored = localStorage.getItem('site-theme');
+            if (!stored) {
+              try { stored = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch(e){ stored = 'light'; }
+            }
+            setThemeState(stored);
+
+            toggles.forEach(function(btn){
+              btn.addEventListener('click', function(e){
+                e.preventDefault();
+                var next = document.body.classList.contains('dark-theme') ? 'light' : 'dark';
+                console.log('theme toggle clicked, switching to', next);
+                localStorage.setItem('site-theme', next);
+                setThemeState(next);
+              });
+            });
+          } catch (err) {
+            console.error('header script error', err);
+          }
+        });
+      })();
+    </script>
 </header>

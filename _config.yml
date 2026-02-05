@@ -10,9 +10,6 @@ logo: toto-logo.png
 # csv file names - change if your csv files have different names
 posts_csv: posts
 
-# address for map tile server - change if you have your own server
-map_tile_server: https://demotiles.maplibre.org/style.json
-
 # color theme for links
 theme-color: indigo # indigo|yellow|pink|green|stone|
 
@@ -20,8 +17,6 @@ theme-color: indigo # indigo|yellow|pink|green|stone|
 nav-menu:
   - title: Home
     link: index
-  - title: Posts
-    link: posts
   - title: About
     link: about
 

@@ -1,0 +1,13 @@
+{%- assign url = include.post.object_location | default: '' -%}
+{%- if url != '' -%}
+  <div class="post-directlink w-full mb-4" style="width:100%;max-width:880px;">
+    <div style="margin-bottom:.5rem;">
+      <a href="{{ url }}" target="_blank" rel="noopener noreferrer" class="inline-block text-sm text-blue-600 hover:underline">Open in new tab</a>
+    </div>
+    <div style="width:100%;height:480px;border:1px solid rgba(0,0,0,0.06);border-radius:8px;overflow:hidden;">
+      <iframe src="{{ url }}" title="{{ include.post.title | default: 'Embedded content' }}" style="width:100%;height:100%;border:0;" loading="lazy"></iframe>
+    </div>
+  </div>
+{%- else -%}
+  <!-- no direct-link URL provided -->
+{%- endif -%}

@@ -10,6 +10,7 @@ GEM
       http_parser.rb (~> 0)
     eventmachine (1.2.7)
     ffi (1.17.2-arm64-darwin)
+    ffi (1.17.2-x64-mingw-ucrt)
     ffi (1.17.2-x86_64-linux-gnu)
     forwardable-extended (2.6.0)
     http_parser.rb (0.8.0)
@@ -65,11 +66,18 @@ GEM
       ffi (~> 1.9)
     terminal-table (2.0.0)
       unicode-display_width (~> 1.1, >= 1.1.1)
+    thread_safe (0.3.6)
+    tzinfo (1.2.11)
+      thread_safe (~> 0.1)
+    tzinfo-data (1.2025.3)
+      tzinfo (>= 1.0.0)
     unicode-display_width (1.8.0)
+    wdm (0.2.0)
     webrick (1.9.2)
 
 PLATFORMS
   arm64-darwin
+  x64-mingw-ucrt
   x86_64-linux
 
 DEPENDENCIES
@@ -81,7 +89,7 @@ DEPENDENCIES
   rexml (~> 3.3.9)
   tzinfo (~> 1.2)
   tzinfo-data
-  wdm (~> 0.1.1)
+  wdm (~> 0.2.0)
   webrick (>= 1.8.2)
 
 BUNDLED WITH

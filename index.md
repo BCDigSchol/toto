@@ -1,7 +1,6 @@
 ---
-layout: page
+layout: posts
 title: Home
 show-title: false
 ---
 
-Welcome, this is a temporary landing page.

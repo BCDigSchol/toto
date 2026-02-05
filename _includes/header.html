@@ -1,11 +1,13 @@
 <header class="w-full flex flex-col justify-start items-center">
     <!-- medium to larger screens header (invisible on mobile) -->
     <div class="normal-header w-full header-container card flex-col justify-center items-center">
+        <img src="{{ 'assets/img/' | append: site.logo }}" alt="{{ site.title }} logo" />
         <div class="my-3 w-full title-font p-2 text-center flex flex-col justify-center items-center">
             <a class="tracking-widest" href="{{site.baseurl}}/">
                 {{ site.title }}
             </a>
         </div>
+        
         <div class="nav-bar w-full flex flex-row justify-around items-center py-4 px-10 header-nav-bar">
             {% for menu_item in site.nav-menu %}
                 <!-- put dropdown container if submenu exists -->
@@ -58,7 +60,9 @@
             <a class="tracking-widest" href="{{site.baseurl}}/">
                 {{ site.title }}
             </a>
+            <img src="{{ 'assets/img/' | append: site.logo }}" alt="{{ site.title }} logo" height="48px" width="48px"/>
         </div>
+        
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const dropdownButton = document.querySelector('.mobile-nav-dropdown-button');

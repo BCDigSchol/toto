@@ -945,3 +945,113 @@
 .hover\:scale-\[1\.01\]:hover {
   transform: scale(1.01);
 }
+
+.visible {
+    display: block;
+    visibility: visible;
+}
+.hidden {
+    display: none !important;
+    visibility: hidden;
+}
+// ...existing code...
+
+/* Responsive breakpoints - lg (min-width:1024px) */
+@media (min-width: 1024px) {
+  /* layout / flex */
+  .lg\:flex { display: flex; }
+  .lg\:flex-row { flex-direction: row; }
+  .lg\:flex-col { flex-direction: column; }
+  .lg\:flex-none { flex: none; }
+
+  /* sizing */
+  .lg\:w-full { width: 100%; max-width: 100vw; }
+  .lg\:w-72 { width: 18rem; } /* Tailwind w-72 */
+
+  .lg\:h-full { height: 100%; }
+
+  /* positioning */
+  .lg\:sticky { position: sticky; }
+  .lg\:top-0 { top: 0; }
+  .lg\:overflow-y-auto { overflow-y: auto; }
+
+  /* alignment */
+  .lg\:items-start { align-items: flex-start; }
+  .lg\:items-stretch { align-items: stretch; }
+  .lg\:items-center { align-items: center; }
+  .lg\:justify-start { justify-content: flex-start; }
+
+  /* display helpers */
+  .lg\:block { display: block; }
+  .lg\:hidden { display: none !important; }
+
+  /* borders */
+  .lg\:border-r { border-right-width: 1px; }
+  .lg\:border-b-0 { border-bottom-width: 0; }
+
+  /* spacing */
+  .lg\:mt-3 { margin-top: 0.75rem; }
+  .lg\:mt-6 { margin-top: 1.5rem; }
+  .lg\:ml-0 { margin-left: 0; }
+  .lg\:space-y-2 { gap: 0.5rem; } /* works on flex/grid containers */
+
+}
+
+.avatar {
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+/* helper for images to behave like Tailwind's object-cover */
+.object-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+}
+
+.box-border {
+  box-sizing: border-box;
+}
+.box-content {
+  box-sizing: content-box;
+}
+
+/* overflow helpers */
+.overflow-hidden { overflow: hidden; }
+.overflow-x-hidden { overflow-x: hidden; }
+.overflow-y-auto { overflow-y: auto; }
+
+/* flex helpers */
+.flex-1 {
+  flex: 1 1 0%;
+  min-width: 0; /* prevents overflow in flex items */
+}
+.flex-none {
+  flex: none;
+}
+
+/* alignment */
+.items-stretch { align-items: stretch; }
+
+/* common sizing helpers you used */
+.max-w-3xl { max-width: 48rem; } /* adjust if you prefer a different size */
+
+/* utility to clip children to rounded corners */
+.overflow-hidden { overflow: hidden; }
+
+/* small helper for centering content inside blocks (used for avatars etc.) */
+.inline-flex { display: inline-flex; align-items: center; justify-content: center; }
+

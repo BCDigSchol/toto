@@ -35,7 +35,7 @@
            onfocus="this.style.outline='2px solid #0b5fff';this.style.outlineOffset='2px'" onblur="this.style.outline='';">{{ include.post.author_name }} {{ include.post.author_last_initial}}</a>
       </div>
       <div class="text-xs text-gray-600">
-          <a href="{{ ('/?author_department=' | append: author_dept_q) | relative_url }}" title="Show posts in {{ include.post.author_department }}" aria-label="Show posts in {{ include.post.author_department }}"
+          <a href="{{ ('/?author_department=' | append: author_department) | relative_url }}" title="Show posts in {{ include.post.author_department }}" aria-label="Show posts in {{ include.post.author_department }}"
             style="color:#9f5252 !important;text-decoration:none !important;"
             onfocus="this.style.outline='2px solid #0b5fff';this.style.outlineOffset='2px'" onblur="this.style.outline='';">{{ include.post.author_department }}</a>
     </div>

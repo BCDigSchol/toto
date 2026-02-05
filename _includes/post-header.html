@@ -2,6 +2,7 @@
   <div class="flex items-center">
     {%- assign author_name_q = include.post.author_name | default: '' | uri_escape -%}
     {%- assign author_last_q = include.post.author_last_initial | default: '' | uri_escape -%}
+    {%- assign author_dept_q = include.post.author_department | default: '' | uri_escape -%}
     <div class="avatar rounded-full bg-gray-200 mr-3" style="width:48px;height:48px;overflow:hidden;display:inline-block;">
       {%- assign author_link = '/?' | append: 'author_name=' | append: author_name_q -%}
       {%- if include.post.author_last_initial and include.post.author_last_initial != '' -%}
@@ -29,14 +30,14 @@
     </div>
     <div class="author leading-tight">
       <div class="text-sm font-semibold">
-        <a href="{{ author_link }}" title="Show posts by {{ include.post.author_name }} {{ include.post.author_last_initial }}" aria-label="Show posts by {{ include.post.author_name }} {{ include.post.author_last_initial }}"
+        <a href="{{ author_link | relative_url }}" title="Show posts by {{ include.post.author_name }} {{ include.post.author_last_initial }}" aria-label="Show posts by {{ include.post.author_name }} {{ include.post.author_last_initial }}"
            style="color:#9f5252 !important;text-decoration:none !important;font-weight:600 !important;"
            onfocus="this.style.outline='2px solid #0b5fff';this.style.outlineOffset='2px'" onblur="this.style.outline='';">{{ include.post.author_name }} {{ include.post.author_last_initial}}</a>
       </div>
       <div class="text-xs text-gray-600">
-        <a href="{{ site.baseurl }}?author_department={{ include.post.author_department | uri_escape }}" title="Show posts in {{ include.post.author_department }}" aria-label="Show posts in {{ include.post.author_department }}"
-           style="color:#9f5252 !important;text-decoration:none !important;"
-           onfocus="this.style.outline='2px solid #0b5fff';this.style.outlineOffset='2px'" onblur="this.style.outline='';">{{ include.post.author_department }}</a>
+          <a href="{{ ('/?author_department=' | append: author_dept_q) | relative_url }}" title="Show posts in {{ include.post.author_department }}" aria-label="Show posts in {{ include.post.author_department }}"
+            style="color:#9f5252 !important;text-decoration:none !important;"
+            onfocus="this.style.outline='2px solid #0b5fff';this.style.outlineOffset='2px'" onblur="this.style.outline='';">{{ include.post.author_department }}</a>
     </div>
   </div>
 </header>

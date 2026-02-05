@@ -1,0 +1,54 @@
+{%- assign obj = include.post.object_location | default: "" -%}
+{%- if obj != "" -%}
+  {%- comment -%} derive a basename (remove common extensions) {%- endcomment -%}
+  {%- assign name = obj | replace: '.mp4','' | replace: '.mov','' | replace: '.avi','' | replace: '.mkv','' | replace: '.webm','' -%}
+  {%- assign converted_rel = '/objects/converted_mp4/' | append: name | append: '.mp4' -%}
+  {%- assign converted_url = converted_rel | relative_url -%}
+
+  {%- assign orig_ext = obj | split:'.' | last | downcase -%}
+  {%- if orig_ext == 'mp4' -%}
+    {%- assign orig_mime = 'video/mp4' -%}
+  {%- elsif orig_ext == 'mov' -%}
+    {%- assign orig_mime = 'video/quicktime' -%}
+  {%- elsif orig_ext == 'avi' -%}
+    {%- assign orig_mime = 'video/x-msvideo' -%}
+  {%- else -%}
+    {%- assign orig_mime = 'application/octet-stream' -%}
+  {%- endif -%}
+
+  {%- assign obj_url = '/objects/' | append: obj | relative_url -%}
+
+  <div class="post-video mb-4 rounded overflow-hidden border" style="max-height:480px; background:#000;">
+    <video id="video-{{ include.post.id | default: include.post.title | slugify }}" class="w-full h-auto" controls preload="metadata" playsinline style="width:100%;height:100%;object-fit:contain;background:#000;">
+      <!-- try converted MP4 first (preferred for web) -->
+      <source src="{{ converted_url }}" type="video/mp4">
+      <!-- fallback to original uploaded object -->
+      <source src="{{ obj_url }}" type="{{ orig_mime }}">
+      Your browser does not support the video element. You can <a href="{{ converted_url }}">download the video</a> instead.
+    </video>
+    {% if include.post.caption %}
+    <div class="video-caption text-sm text-gray-600 mt-2">{{ include.post.caption }}</div>
+    {% endif %}
+    <div id="video-fallback-{{ include.post.id | default: include.post.title | slugify }}" style="display:none;margin-top:.5rem;color:#fff;">
+      <p>Video format may not be supported in your browser. <a href="{{ obj_url }}" style="color:#cce4ff;">Download</a> or try a modern browser (Chrome, Firefox, Safari).</p>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      try{
+        var vid = document.getElementById('video-{{ include.post.id | default: include.post.title | slugify }}');
+        if (!vid) return;
+        var can = '';
+        try { can = vid.canPlayType && vid.canPlayType('{{ mime }}'); } catch(e) { can = ''; }
+        if (!can || can === 'no') {
+          var fb = document.getElementById('video-fallback-{{ include.post.id | default: include.post.title | slugify }}');
+          if (fb) fb.style.display = 'block';
+        }
+      } catch(e) {
+        /* fail silently */
+      }
+    })();
+  </script>
+
+{%- endif -%}

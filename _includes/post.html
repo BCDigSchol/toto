@@ -1,0 +1,26 @@
+<article class="post-item w-full max-w-3xl box-border mb-8 p-4 border rounded-lg shadow-sm" style="width:100%; max-width:880px;">
+  {% include post-header.html post=include.post %}
+
+  {%- if include.post.object_type == "image" -%}
+    {% include post-object-image.html post=include.post %}
+  {%- elsif include.post.object_type == "video" -%}
+    {% include post-object-video.html post=include.post %}
+  {%- endif -%}
+
+  <div class="post-title-row w-full flex items-center justify-between mb-2">
+    <h2 class="post-title text-2xl font-bold flex-1">
+      <a href="{{ '/post' | append: '/' | append: include.post.id | relative_url }}" class="text-inherit no-underline">{{ include.post.title }}</a>
+    </h2>
+    <a href="#" class="post-share text-gray-600 hover:text-gray-800" title="Share" aria-label="Share">
+      <i class="fas fa-share" aria-hidden="true"></i>
+    </a>
+  </div>
+
+  {% if include.post.excerpt or include.post.description %}
+  <p class="post-excerpt text-base text-gray-800 mb-4">{{ include.post.excerpt | default: include.post.description }}</p>
+  {% endif %}
+
+  <footer class="post-meta text-sm text-gray-600">
+    <p><strong>Subjects:</strong> {{ include.post.subjects }}</p>
+  </footer>
+</article>

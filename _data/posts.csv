@@ -1,3 +1,4 @@
 id,object_location,object_type,title,description,caption,author_name,author_last_initial,author_avatar,author_department,subjects,discipline,method
 1,dh-test.jpg,image,"Test Image","This is just a test image","Test image, ignore","Dave","T","dave-t.png","Digital Scholarship","Testing"
-1,test.jpg,image,"Test Image","This is just a test image","Test image, ignore","Melanie","H",,"Digital Scholarship","Testing"
+2,test.jpg,image,"Test Image","This is just a test image","Test image, ignore","Melanie","H",,"Digital Scholarship","Testing"
+3,test.mp4,video,"Test Video","This is just a test video","Test video, ignore","Melanie","H",,"Digital Scholarship","Testing"

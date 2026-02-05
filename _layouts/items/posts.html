@@ -1,0 +1,11 @@
+---
+layout: default
+---
+
+{% include post.html post=page %}
+
+{% if content and content != "" %}
+	<div class="post-full-content mt-6">
+		{{ content }}
+	</div>
+{% endif %}

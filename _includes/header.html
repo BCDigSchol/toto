@@ -1,7 +1,7 @@
 <header class="w-full flex flex-col justify-start items-center">
     <!-- medium to larger screens header (invisible on mobile) -->
     <div class="normal-header w-full header-container card flex-col justify-center items-center">
-        <img src="{{ 'assets/img/' | append: site.logo }}" alt="{{ site.title }} logo" />
+        <img src="{{ 'assets/img/' | append: site.logo | relative_url }}" alt="{{ site.title }} logo" />
         <div class="my-3 w-full title-font p-2 text-center flex flex-col justify-center items-center">
             <a class="tracking-widest" href="{{site.baseurl}}/">
                 {{ site.title }}

@@ -1,0 +1,418 @@
+@import "theme-settings";
+
+a {
+    color: $link-base-color !important;
+    text-decoration: none !important;
+}
+  
+a:visited {
+    color: $link-visited-color !important;
+}
+  
+a:hover {
+    color: $link-hover-color !important;
+}
+
+body, html {
+  width: 100vw;
+  max-width: 100vw;
+  overflow-x: hidden;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body {
+    font-family: $body-font-family, $body-font-style !important;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    background-color: $site-frame-color;
+    color: $body-text-color !important;
+}
+
+p {
+    color: $body-text-color !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: $title-font-family, $title-font-style !important;
+}
+  
+.title-font {
+    font-family: $title-font-family, $title-font-style !important;
+    font-weight: 600;
+    font-style: normal;
+    height: 100%;
+}
+
+.title-font a, .title-font a:visited {
+    color: $site-title-color !important;
+}
+
+.title-font a:hover {
+    color: $link-header-hover-color !important;
+}
+
+pre {
+    background-color: $code-block-color !important;
+}
+  
+/* Settings for header and body to make fixed site header */
+
+/* a element settings for the header */
+header a, header a:visited {
+    color: $link-header-base-color !important;
+}
+  
+header a:hover {
+    color: $link-header-hover-color !important;
+}
+
+/* a element settings for the header */
+footer a, footer a:visited {
+    color: $link-footer-base-color !important;
+}
+  
+footer a:hover {
+    color: $link-footer-hover-color !important;
+}
+
+.site-wrapper {
+    max-width: $site-max-width;
+    background-color: $site-background-color;
+}
+
+.header-container {
+    max-width: $site-max-width;
+    background-image: url($site-header-image-url);
+    color: $header-text-color !important;
+    background-color: $site-header-color;
+}
+
+.footer-container {
+    max-width: $site-max-width;
+    background-color: $site-footer-color;
+    color: $footer-text-color;
+}
+
+.subfooter-container {
+    background-color: $site-accent-color;
+}
+
+/* position and width  of the page body content */
+.content-wrapper {
+
+}
+
+.content-container {
+    max-width: $site-max-width;
+    background-color: $site-background-color;
+    // wrap text to avoid overflowing parent container
+    word-wrap: break-word; /* For older browsers */
+    overflow-wrap: break-word; /* For newer browsers */
+    border-width: 0px 1px 0px 1px;
+    border-style: solid;
+    border-color: #DEDEDE;
+}
+
+/* Settings for the search bar */
+.search-bar {
+    background-color: $search-bar-background;
+    border-color: $search-bar-border;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 5px;
+    padding: 2px;
+    margin: 0px 2px 0px 2px;
+}
+
+.search-bar input {
+    border-radius: 5px;
+    padding: 2px 4px 2px 4px;
+    margin: 2px;
+}
+
+.search-bar a:link, .search-bar a:hover, .search-bar a:visited, .search-bar ul {
+    color: $search-bar-results !important;
+}
+
+/* Used to make various elements 'float' with a shadow */
+.card {
+    box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.1), 0 4px 20px 0 rgba(0, 0, 0, 0.09);
+}
+
+.button {
+    background-color: $site-header-color;
+    color: $link-header-base-color;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.button a {
+    color: $link-header-base-color !important;
+    text-decoration: none;
+}
+  
+.button a:hover {
+    color: $link-header-hover-color !important;
+    text-decoration: none;
+}
+
+/* Used for regular dropdown menus*/
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+  
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: $site-background-color;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    padding: 12px 16px;
+    z-index: 1;
+}
+  
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-content a, .dropdown-content a:visited {
+    color: $link-dropdown-base-color !important;
+}
+
+.dropdown-content a:hover {
+    color: $link-dropdown-hover-color !important;
+}
+
+/**
+   * Pagination navbar
+   */
+   .pagination {
+    li {
+      a, div {
+        min-width: 41px;
+        text-align: center;
+        box-sizing: border-box;
+        border-radius: 10px;
+      }
+      div {
+        display: block;
+        border: 1px solid transparent;
+        border-radius: 10px;
+  
+        &.pager-edge {
+          color: #000000;
+          border: 1px dashed;
+        }
+      }
+    }
+  }
+
+.site-title-nav a, .site-title-nav a:visited {
+    color: $link-header-base-color !important;
+}
+  
+.site-title-nav a:hover {
+    color: $link-header-hover-color !important;
+}
+
+p.bibliography {
+    margin-left: 2em;
+    text-indent: -2em;
+    // wrap text to avoid overflowing parent container
+    word-wrap: break-all; /* For older browsers */
+    overflow-wrap: break-all; /* For newer browsers */
+}
+
+p.bibliography a {
+    text-decoration: none;
+}
+
+.prose {
+    max-width: 100ch !important;
+}
+
+.featured-img {
+    transition: 1s
+}
+
+.mobile-nav-dropdown-button {
+    position: relative;
+}
+  
+.mobile-nav-dropdown-button .nav-dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: $site-header-mobile-dropdown-menu-color;
+    color: $mobile-dropdown-menu-text-color;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    padding: 12px 16px;
+    z-index: 1;
+    right: 0px;
+    top: 0px;
+}
+
+.nav-dropdown-content.show {
+    display: flex;
+}
+
+.nav-dropdown-content a, .nav-dropdown-content a:visited {
+    color: $mobile-dropdown-menu-text-color !important;
+}
+
+// deal with dropdown menus inside the nav dropdown menu
+.mobile-nav-dropdown-button .nav-dropdown-content .dropdown .dropdown-content a,  .mobile-nav-dropdown-button .nav-dropdown-content .dropdown .dropdown-content a:visited {
+    color: $body-text-color !important;
+}
+
+.mobile-nav-dropdown-button .nav-dropdown-content .dropdown .dropdown-content a:hover {
+    color: $link-dropdown-hover-color !important;
+}
+
+.mobile-nav-dropdown-button .nav-dropdown-content .dropdown .dropdown-content {
+    top: 0px;
+    right: 0px;
+}
+
+// alternatives for mobile settings
+@media screen and (min-width: 769px) {
+
+    .title-font {
+        font-size: 40px;
+    }
+
+    .nav-bar {
+        font-size: 100%;
+    }
+
+    .page-content {
+        padding: 10px 10px 10px 10px;
+    }
+
+    .normal-header {
+        display: flex;
+    }
+
+    .mobile-header {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 768px) and (min-width: 401px) {
+
+    .title-font {
+        font-size: 20px;
+        width: 100%;
+    }
+
+    .footer-container {
+        font-size: 75%;
+    }
+
+    .nav-bar {
+        font-size: 75%;
+    }
+
+    .page-content {
+        padding: 10px 10px 10px 10px;
+    }
+
+    .normal-header {
+        display: none;
+    }
+
+    .mobile-header {
+        display: flex;
+    }
+}
+
+@media screen and (max-width: 400px) {
+
+    .title-font {
+        font-size: 14px;
+        width: 100%;
+    }
+    
+    .footer-container {
+        font-size: 50%;
+    }
+
+    .nav-bar {
+        font-size: 50%;
+    }
+
+    .page-content {
+        padding: 15px 15px 15px 15px;
+    }
+
+    .normal-header {
+        display: none;
+    }
+
+    .mobile-header {
+        display: flex;
+    }
+}
+
+h3 {
+    font-size-adjust: 0.70;
+}
+
+.prose img {
+    padding: 0px !important;
+    margin: 5px 0px 5px 0px !important;
+}
+
+.grid-item-shaded-header {
+    background-color: $site-accent-color;
+     a {
+        color: $link-header-base-color !important;
+    }
+}
+
+.list-none {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.readings-content ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 2rem 0;
+}
+
+.readings-content > ul > li {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #1f2937;
+  box-shadow: 0 2px 8px 0 rgba(60,60,60,0.06);
+  transition: background 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+
+.readings-content > ul > li:hover {
+  background: #e5e7eb;
+  box-shadow: 0 4px 16px 0 rgba(60,60,60,0.10);
+}
+
+.readings-content ul ul {
+  margin: 0.5rem 0 0.5rem 1.5rem;
+}
+
+.readings-content ul ul li {
+  background: none;
+  border: none;
+  border-radius: 0;
+  margin: 0.25rem 0;
+  padding: 0;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #374151;
+  box-shadow: none;
+}

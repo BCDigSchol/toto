@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Toto Digital Scholarship Resources"
+authors:
+  - family-names: Thomas
+    given-names: David
+    orcid: https://orcid.org/0000-0001-5494-6297
+abstract: "Static Site for Toto Digital Scholarship Resources @ Boston College"
+version: 0.0.1
+date-released: "2026-2-4"
+license: "CC-BY-NC-SA-4.0"
+repository-code: "https://github.com/BCDigSchol/toto"

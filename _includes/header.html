@@ -1,0 +1,132 @@
+<header class="w-full flex flex-col justify-start items-center">
+    <!-- medium to larger screens header (invisible on mobile) -->
+    <div class="normal-header w-full header-container card flex-col justify-center items-center">
+        <div class="my-3 w-full title-font p-2 text-center flex flex-col justify-center items-center">
+            <a class="tracking-widest" href="{{site.baseurl}}/">
+                {{ site.title }}
+            </a>
+        </div>
+        <div class="nav-bar w-full flex flex-row justify-around items-center py-4 px-10 header-nav-bar">
+            {% for menu_item in site.nav-menu %}
+                <!-- put dropdown container if submenu exists -->
+                {% if menu_item.submenu %}
+                    <div class="dropdown">
+                {% endif %}
+                <span>
+                    {% if menu_item.link %}
+                        <a href="{{ menu_item.link | relative_url }}">
+                            {{ menu_item.title }}
+                        </a>
+                    {% elsif menu_item.external-link %}
+                        <a href="{{ menu_item.external-link }}">
+                            {{ menu_item.title }}
+                        </a>
+                    {% else %}
+                        {{ menu_item.title }}
+                    {% endif %}
+                    </span>
+                {% if menu_item.submenu %}
+                    <div class="dropdown-content">
+                        {% for submenu_item in menu_item.submenu %}
+                            {% if submenu_item.link %}
+                            <a href="{{ submenu_item.link | relative_url }}">
+                                {{ submenu_item.title }}
+                            </a>
+                            {% elsif submenu_item.external-link %}
+                            <a href="{{ submenu_item.external-link }}">
+                                {{ submenu_item.title }}
+                            </a>
+                            {% else %}
+                                {{ submenu_item.title }}
+                            {% endif %}
+                            {% if forloop.last == false %}
+                                <hr />
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <!-- close dropdown container -->
+                {% if menu_item.submenu %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    <!-- xs to small screens (mobile, invisible to desktop) -->
+    <div class="mobile-header w-full header-container card flex-row justify-start items-center p-2">
+        <div class="title-font">
+            <a class="tracking-widest" href="{{site.baseurl}}/">
+                {{ site.title }}
+            </a>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const dropdownButton = document.querySelector('.mobile-nav-dropdown-button');
+                const dropdownContent = document.querySelector('.nav-dropdown-content');
+        
+                dropdownButton.addEventListener('click', function () {
+                    dropdownContent.classList.toggle('show');
+                });
+        
+                // Optional: Close the dropdown if clicked outside
+                document.addEventListener('click', function (event) {
+                    if (!dropdownButton.contains(event.target) && !dropdownContent.contains(event.target)) {
+                        dropdownContent.classList.remove('show');
+                    }
+                });
+            });
+        </script>
+        <div class="mobile-nav-dropdown-button" data-toggle="dropdown">
+            <i class="fa-solid fa-bars"></i>
+
+            <div class="nav-dropdown-content text-center flex flex-col justify-start items-center">
+                {% for menu_item in site.nav-menu %}
+                    <!-- put dropdown container if submenu exists -->
+                    {% if menu_item.submenu %}
+                        <div class="dropdown">
+                    {% endif %}
+                    <span>
+                        {% if menu_item.link %}
+                            <a href="{{ menu_item.link | relative_url }}">
+                                {{ menu_item.title }}
+                            </a>
+                        {% elsif menu_item.external-link %}
+                            <a href="{{ menu_item.external-link }}">
+                                {{ menu_item.title }}
+                            </a>
+                        {% else %}
+                            {{ menu_item.title }}
+                        {% endif %}
+                        </span>
+                    {% if menu_item.submenu %}
+                        <div class="dropdown-content">
+                            {% for submenu_item in menu_item.submenu %}
+                                {% if submenu_item.link %}
+                                <a href="{{ submenu_item.link | relative_url }}">
+                                    {{ submenu_item.title }}
+                                </a>
+                                {% elsif submenu_item.external-link %}
+                                <a href="{{ submenu_item.external-link }}">
+                                    {{ submenu_item.title }}
+                                </a>
+                                {% else %}
+                                    {{ submenu_item.title }}
+                                {% endif %}
+                                {% if forloop.last == false %}
+                                    <hr />
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <!-- close dropdown container -->
+                    {% if menu_item.submenu %}
+                        </div>
+                    {% endif %}
+                    {% if forloop.last == false %}
+                        <hr />
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</header>

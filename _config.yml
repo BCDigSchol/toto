@@ -1,0 +1,40 @@
+# change the followings to match your Github username and repo name
+baseurl: "/toto" # the name of your github repo
+url: "https://BCDigSchol.github.io" # the url of your github pages (change BCDigSchol to your username)
+
+# site information used in page title, meta data etc.
+title: Toto
+# description: Developed by Boston College
+
+# csv file names - change if your csv files have different names
+posts_csv: posts
+
+# address for map tile server - change if you have your own server
+map_tile_server: https://demotiles.maplibre.org/style.json
+
+# color theme for links
+theme-color: indigo # indigo|yellow|pink|green|stone|
+
+# nav bar settings and links
+nav-menu:
+  - title: Home
+    link: index
+  - title: Posts
+    link: posts
+  - title: About
+    link: about
+
+hide-footer: false # set to true to hide the footer
+footer-message: Toto Digital Scholarship Resources | CC BY-NC License
+footer-submessage:  By David J. Thomas, with the Digital Scholarship Group, Boston College
+footer-submessage-link: https://ds.bc.edu
+
+# google-analytics: // if you want to use Google analytics, include your ID here
+
+include:
+  - _pages
+
+# jekyll plugins - no need to change
+plugins:
+    - jekyll-seo-tag
+    - jekyll-feed

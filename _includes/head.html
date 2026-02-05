@@ -1,0 +1,29 @@
+<head>
+    <!-- google analytics -->
+    {% if site.google-analytics %}
+      {% include google-analytics.html %}
+    {% endif %}
+  
+    <!-- Jekyll SEO plugin -->
+    {% seo %}
+  
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ "favicon.ico" | relative_url }}">
+    <title>{{ site.title }}</title>
+  
+    <link rel="stylesheet" href="{{ "assets/css/main.css" | relative_url }}">
+    
+    <!-- Simple-Jekyll-Search -->
+    <script src="{{ "assets/js/simple-jekyll-search.min.js" | relative_url }}"></script>
+  
+    <!-- fontawesome -->
+    <link rel="stylesheet" href="{{ "assets/css/fontawesome/fontawesome.min.css" | relative_url }}">
+    <link rel="stylesheet" href="{{ "assets/css/fontawesome/solid.min.css" | relative_url }}">
+
+    <!-- maplibre -->
+    <script src="https://unpkg.com/maplibre-gl@^5.15.0/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@^5.15.0/dist/maplibre-gl.css" rel="stylesheet" />
+
+
+</head>

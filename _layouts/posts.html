@@ -64,27 +64,6 @@ layout: page
       var audios = Array.prototype.slice.call(document.querySelectorAll('audio'));
       var audioAutoplayAllowed = sessionStorage.getItem('autoplayAudio') === '1';
 
-      // if audio autoplay isn't allowed yet, show a small opt-in control
-      if (!audioAutoplayAllowed && audios.length) {
-        try{
-          var b = document.createElement('div');
-          b.id = 'audio-autoplay-consent';
-          b.style.position = 'fixed';
-          b.style.right = '1rem';
-          b.style.bottom = '1rem';
-          b.style.zIndex = '10000';
-          b.style.background = 'rgba(255,255,255,0.95)';
-          b.style.border = '1px solid rgba(0,0,0,0.08)';
-          b.style.padding = '0.5rem';
-          b.style.borderRadius = '8px';
-          b.style.boxShadow = '0 6px 20px rgba(2,6,23,0.08)';
-          b.style.fontSize = '0.95rem';
-          b.innerHTML = '<div style="display:flex;gap:.5rem;align-items:center;"><button id="enable-audio-autoplay" style="background:#4f46e5;color:#fff;border:none;padding:.35rem .6rem;border-radius:6px;cursor:pointer;">Enable audio autoplay</button><button id="dismiss-audio-autoplay" style="background:transparent;border:none;color:#374151;cursor:pointer;">Dismiss</button></div>';
-          document.body.appendChild(b);
-          document.getElementById('enable-audio-autoplay').addEventListener('click', function(){ sessionStorage.setItem('autoplayAudio','1'); audioAutoplayAllowed = true; try{ document.body.removeChild(b); }catch(e){}; });
-          document.getElementById('dismiss-audio-autoplay').addEventListener('click', function(){ try{ document.body.removeChild(b); }catch(e){} });
-        }catch(e){}
-      }
         if (!vids.length) return;
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 

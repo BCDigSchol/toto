@@ -58,6 +58,115 @@ layout: page
 
 <script>
   (function(){
+    try{
+      if (!('IntersectionObserver' in window)) return;
+      var vids = Array.prototype.slice.call(document.querySelectorAll('video'));
+      var audios = Array.prototype.slice.call(document.querySelectorAll('audio'));
+      if (!vids.length && !audios.length) return;
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      // prepare media elements
+      vids.forEach(function(vid){ try{ vid.muted = true; vid.setAttribute('muted',''); }catch(e){}; vid._userPaused = false; vid.addEventListener('pause', function(){ if (!vid._autoPaused) { vid._userPaused = true; } }); vid.addEventListener('play', function(){ vid._userPaused = false; }); });
+      audios.forEach(function(a){ a._userPaused = false; a.addEventListener('pause', function(){ if (!a._autoPaused) { a._userPaused = true; } }); a.addEventListener('play', function(){ a._userPaused = false; }); });
+
+      var obs = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          var target = entry.target;
+          // find a video or audio inside the observed target
+          var media = null;
+          if (target.tagName) {
+            var tname = target.tagName.toLowerCase();
+            if (tname === 'video' || tname === 'audio') media = target;
+          }
+          if (!media && target.querySelector) {
+            media = target.querySelector('video') || target.querySelector('audio');
+          }
+          if (!media) return;
+
+          if (entry.intersectionRatio >= 0.5) {
+            if (media._userPaused) return;
+            try{ if (media.tagName.toLowerCase() === 'video') { media.muted = true; media.setAttribute('muted',''); var p = media.play(); if (p && p.catch) p.catch(function(){}); }
+                  else if (media.tagName.toLowerCase() === 'audio') { // pause other audios
+                    audios.forEach(function(a){ if (a !== media && !a.paused) { a._autoPaused = true; a.pause(); a._autoPaused = false; } });
+                    var p = media.play(); if (p && p.catch) p.catch(function(){});
+                  }
+            } catch(e){}
+          } else {
+            try{ if (!media.paused) { media._autoPaused = true; media.pause(); media._autoPaused = false; } } catch(e){}
+          }
+        });
+      }, { threshold: [0,0.25,0.5,0.75,1] });
+
+      vids.concat(audios).forEach(function(m){ var target = m.closest && m.closest('.post-video') || m; obs.observe(target); });
+
+      document.addEventListener('visibilitychange', function(){ if (document.hidden) { vids.concat(audios).forEach(function(m){ try{ m.pause(); }catch(e){} }); } });
+
+      } catch(e) { }
+  })();
+</script>
+
+<!-- YouTube lazy-init + autoplay-on-scroll manager -->
+<script>
+  (function(){
+    try{
+      if (!('IntersectionObserver' in window)) return;
+
+      // load YT API if not present
+      function loadYouTubeAPI(cb){
+        if (window.YT && window.YT.Player) return cb && cb();
+        var tag = document.createElement('script'); tag.src = 'https://www.youtube.com/iframe_api';
+        var first = document.getElementsByTagName('script')[0]; first.parentNode.insertBefore(tag, first);
+        window.onYouTubeIframeAPIReady = function(){ if (cb) cb(); };
+      }
+
+      var placeholders = Array.prototype.slice.call(document.querySelectorAll('.yt-placeholder'));
+      if (!placeholders.length) return;
+
+      var toInit = [];
+      placeholders.forEach(function(ph){ if (ph.getAttribute('data-yt-initialized') !== '1') toInit.push(ph); });
+      if (!toInit.length) return;
+
+      var obs = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if (entry.intersectionRatio >= 0.5) {
+            var ph = entry.target;
+            if (ph.getAttribute('data-yt-initialized') === '1') { obs.unobserve(ph); return; }
+            // initialize iframe without autoplay, then use API to play muted
+            var id = ph.getAttribute('data-video-id');
+            var pid = 'yt-' + id + '-{{ include.post.id | default: include.post.title | slugify }}';
+            var iframe = document.createElement('iframe');
+            iframe.setAttribute('id', pid);
+            iframe.setAttribute('src', 'https://www.youtube.com/embed/' + id + '?rel=0&modestbranding=1&enablejsapi=1');
+            iframe.setAttribute('frameborder', '0');
+            iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen');
+            iframe.setAttribute('allowfullscreen', '');
+            iframe.style.position = 'absolute'; iframe.style.top='0'; iframe.style.left='0'; iframe.style.width='100%'; iframe.style.height='100%';
+            ph.innerHTML = ''; ph.appendChild(iframe); ph.setAttribute('data-yt-initialized','1');
+
+            loadYouTubeAPI(function(){
+              try{
+                var player = new YT.Player(pid, {
+                  events: {
+                    'onReady': function(ev){ try{ ev.target.mute(); ev.target.playVideo(); }catch(e){} },
+                    'onStateChange': function(s){ /* no-op */ }
+                  }
+                });
+              } catch(e){ }
+            });
+
+            obs.unobserve(ph);
+          }
+        });
+      }, { threshold: [0,0.25,0.5,0.75,1] });
+
+      toInit.forEach(function(ph){ var target = ph.closest && ph.closest('.post-video') || ph; obs.observe(target); });
+
+    } catch(e){ }
+  })();
+</script>
+
+<script>
+  (function(){
     // Share button: copy item URL to clipboard and show a toast
     try {
       var container = document.querySelector('.posts-container');

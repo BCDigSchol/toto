@@ -19,7 +19,7 @@
   {%- assign obj_url = '/objects/' | append: obj | relative_url -%}
 
   <div class="post-video mb-4 rounded overflow-hidden border" style="max-height:480px; background:#000;">
-    <video id="video-{{ include.post.id | default: include.post.title | slugify }}" class="w-full h-auto" controls preload="metadata" playsinline style="width:100%;height:100%;object-fit:contain;background:#000;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,0.12);border:1px solid rgba(0,0,0,0.06);">
+    <video id="video-{{ include.post.id | default: include.post.title | slugify }}" class="w-full h-auto" controls preload="metadata" playsinline muted style="width:100%;height:100%;object-fit:contain;background:#000;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,0.12);border:1px solid rgba(0,0,0,0.06);">
       <!-- try converted MP4 first (preferred for web) -->
       <source src="{{ converted_url }}" type="video/mp4">
       <!-- fallback to original uploaded object -->
@@ -48,6 +48,67 @@
       } catch(e) {
         /* fail silently */
       }
+    })();
+  </script>
+
+  <script>
+    (function(){
+      try{
+        // prefer locating by explicit id (most robust); fallback to matching source URLs
+        var vidId = 'video-{{ include.post.id | default: include.post.title | slugify }}';
+        var vid = document.getElementById(vidId);
+        if (!vid) {
+          // fallback: try to find a video whose first source src matches our converted_url or obj_url
+          var conv = '{{ converted_url }}';
+          var obju = '{{ obj_url }}';
+          var vids = document.querySelectorAll('video');
+          for (var i=0;i<vids.length;i++){
+            try{
+              var s = vids[i].querySelector && vids[i].querySelector('source');
+              var src = s && (s.getAttribute('src') || s.src) || '';
+              if (src && (src.indexOf(conv) !== -1 || src.indexOf(obju) !== -1)) { vid = vids[i]; break; }
+            }catch(e){}
+          }
+        }
+        if (!vid) {
+          if (window.__videoAutoplayDebug) console.warn('autoplay script: video element not found', vidId);
+          return;
+        }
+
+        // Respect users who prefer reduced motion
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        // If user manually paused, don't re-autoplay
+        vid.addEventListener('pause', function(){ if (!vid._autoPaused) vid.dataset.userPaused = '1'; });
+        vid.addEventListener('play', function(){ delete vid.dataset.userPaused; });
+
+        var obsTarget = container || vid;
+        var thresholds = [0, 0.25, 0.5, 0.75, 1];
+        var observer = new IntersectionObserver(function(entries){
+          entries.forEach(function(entry){
+            try{
+              if (entry.intersectionRatio >= 0.5) {
+                if (vid.dataset.userPaused) return;
+                try { vid.muted = true; vid.setAttribute('muted', ''); } catch(e){}
+                var p = vid.play();
+                if (p && p.catch) p.catch(function(){});
+              } else {
+                if (!vid.paused) { vid._autoPaused = true; vid.pause(); vid._autoPaused = false; }
+              }
+            }catch(e){}
+          });
+        }, { threshold: thresholds });
+
+        observer.observe(obsTarget);
+
+        // Pause when page hidden to save resources
+        document.addEventListener('visibilitychange', function(){ if (document.hidden) { try{ vid.pause(); }catch(e){} } });
+
+        // Clean up if video is removed from DOM
+        var rmObserver = new MutationObserver(function(mutations){ if (!document.body.contains(vid)) { try{ observer.disconnect(); rmObserver.disconnect(); }catch(e){} } });
+        rmObserver.observe(document.body, { childList: true, subtree: true });
+
+      } catch(e) { /* fail silently */ }
     })();
   </script>
 

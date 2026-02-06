@@ -13,6 +13,17 @@
   data-author-department="{{ include.post.author_department | default: '' | downcase | escape }}">
   {% include post-header.html post=include.post %}
 
+  <style>
+    /* Dark-mode readability for post excerpts (mirror about page rules) */
+    body.dark-theme .post-excerpt,
+    body.dark-theme .post-excerpt[style] { color: #cbd5e1 !important; }
+
+    @media (prefers-color-scheme: dark) {
+      .post-excerpt, .post-excerpt[style] { color: #cbd5e1 !important; }
+      .post-item[style] { background: transparent !important; }
+    }
+  </style>
+
   {%- if include.post.object_type == "image" -%}
     {% include post-object-image.html post=include.post %}
   {%- elsif include.post.object_type == "video" -%}
@@ -80,7 +91,7 @@
   </div>
 
   {% if include.post.excerpt or include.post.description %}
-  <p class="post-excerpt text-base text-gray-800 mb-4">{{ include.post.excerpt | default: include.post.description }}</p>
+  <p class="post-excerpt text-base text-gray-800 dark:text-gray-200 mb-4">{{ include.post.excerpt | default: include.post.description }}</p>
   {% endif %}
 
   <footer class="post-meta text-sm text-gray-600">

@@ -12,9 +12,28 @@ layout: page
 <div class="posts-container w-full flex flex-col justify-start items-center box-border">
   {% assign posts = site.data.posts | sort: 'id' | reverse %}
   {% for post in posts %}
-    {% include post.html post=post %}
+    <div class="post-wrapper w-full" data-post-id="{{ post.id }}">
+      {% include post.html post=post %}
+    </div>
   {% endfor %}
 </div>
+
+<script>
+  (function(){
+    try{
+      var container = document.querySelector('.posts-container');
+      if (!container) return;
+      var wrappers = Array.prototype.slice.call(container.querySelectorAll('.post-wrapper'));
+      if (!wrappers.length) return;
+      wrappers.sort(function(a,b){
+        var ai = parseInt(a.getAttribute('data-post-id')||0,10);
+        var bi = parseInt(b.getAttribute('data-post-id')||0,10);
+        return bi - ai;
+      });
+      wrappers.forEach(function(w){ container.appendChild(w); });
+    }catch(e){}
+  })();
+</script>
 
 <!-- Image modal (click-to-expand) -->
 <div id="image-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;padding:1rem;">

@@ -144,14 +144,19 @@ layout: page
       placeholders.forEach(function(ph){ if (ph.getAttribute('data-yt-initialized') !== '1') toInit.push(ph); });
       if (!toInit.length) return;
 
+      // Track YT players so we can pause others when one plays and pause when out of view
+      var ytPlayers = {}; // pid -> YT.Player
+      var elToPid = new WeakMap();
+
       var obs = new IntersectionObserver(function(entries){
         entries.forEach(function(entry){
-          if (entry.intersectionRatio >= 0.5) {
-            var ph = entry.target;
-            if (ph.getAttribute('data-yt-initialized') === '1') { obs.unobserve(ph); return; }
-            // initialize iframe without autoplay, then use API to play muted
-            var id = ph.getAttribute('data-video-id');
-            var pid = 'yt-' + id + '-{{ include.post.id | default: include.post.title | slugify }}';
+          var ph = entry.target;
+          var id = ph.getAttribute && ph.getAttribute('data-video-id');
+          if (!id) return;
+          var pid = 'yt-' + id + '-{{ include.post.id | default: include.post.title | slugify }}';
+
+          // if not initialized, create iframe + player but continue observing
+          if (ph.getAttribute('data-yt-initialized') !== '1') {
             var iframe = document.createElement('iframe');
             iframe.setAttribute('id', pid);
             iframe.setAttribute('src', 'https://www.youtube.com/embed/' + id + '?rel=0&modestbranding=1&enablejsapi=1');
@@ -165,14 +170,33 @@ layout: page
               try{
                 var player = new YT.Player(pid, {
                   events: {
-                    'onReady': function(ev){ try{ ev.target.mute(); ev.target.playVideo(); }catch(e){} },
-                    'onStateChange': function(s){ /* no-op */ }
+                    'onReady': function(ev){ try{ ev.target.mute(); }catch(e){} },
+                    'onStateChange': function(state){ /* no-op */ }
                   }
                 });
-              } catch(e){ }
+                ytPlayers[pid] = player;
+                elToPid.set(ph, pid);
+              } catch(e){}
             });
+          }
 
-            obs.unobserve(ph);
+          // If element is visible enough, play its player and pause others; otherwise pause it
+          var player = ytPlayers[pid];
+          if (entry.intersectionRatio >= 0.5) {
+            // try to ensure player exists; if not, schedule later (API will mute onReady)
+            var playNow = function(){
+              try{
+                // pause all other YT players
+                for (var k in ytPlayers) { if (k !== pid && ytPlayers[k] && ytPlayers[k].pauseVideo) try{ ytPlayers[k].pauseVideo(); }catch(e){} }
+                if (ytPlayers[pid] && ytPlayers[pid].playVideo) try{ ytPlayers[pid].mute && ytPlayers[pid].mute(); ytPlayers[pid].playVideo(); }catch(e){}
+              }catch(e){}
+            };
+            if (player) playNow(); else {
+              // try again shortly in case player hasn't been created yet
+              setTimeout(function(){ if (ytPlayers[pid]) playNow(); }, 250);
+            }
+          } else {
+            if (player && player.pauseVideo) try{ player.pauseVideo(); }catch(e){}
           }
         });
       }, { threshold: [0,0.25,0.5,0.75,1] });

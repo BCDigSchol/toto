@@ -517,14 +517,18 @@ layout: page
           msg.className = 'no-results';
           msg.style.padding = '1rem';
           msg.style.color = '#334155';
-          var parts = [];
-          if (searchParam) parts.push(searchParam);
-          if (subjectParam) parts.push(subjectParam);
-          if (authorNameParam) parts.push('author: ' + authorNameParam);
-          if (authorLastInitialParam) parts.push('last initial: ' + authorLastInitialParam);
-          if (authorDepartmentParam) parts.push('department: ' + authorDepartmentParam);
-          var q = parts.join(' ');
-          msg.textContent = 'No posts found for "' + q + '".';
+          if (favoritesActive) {
+            msg.textContent = 'No liked posts found, try liking some posts to get started.';
+          } else {
+            var parts = [];
+            if (searchParam) parts.push(searchParam);
+            if (subjectParam) parts.push(subjectParam);
+            if (authorNameParam) parts.push('author: ' + authorNameParam);
+            if (authorLastInitialParam) parts.push('last initial: ' + authorLastInitialParam);
+            if (authorDepartmentParam) parts.push('department: ' + authorDepartmentParam);
+            var q = parts.join(' ');
+            msg.textContent = 'No posts found for "' + q + '".';
+          }
           container.parentNode.insertBefore(msg, container);
         }
       }

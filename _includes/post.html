@@ -45,9 +45,37 @@
         <i class="far fa-heart" aria-hidden="true" style="font-size:1.15rem;color:inherit;"></i>
       </button>
 
-      <a href="{{ '/post' | append: '/' | append: include.post.id | relative_url }}" class="post-share text-gray-600 hover:text-gray-800" title="Share" aria-label="Share">
+      <div class="post-share text-gray-600 hover:text-gray-800" title="Share" aria-label="Share" role="button" tabindex="0"
+        data-post-id="{{ include.post.id }}"
+        data-post-url="{{ '/post' | append: '/' | append: include.post.id | relative_url }}"
+        data-post-title="{{ include.post.title | escape }}">
         <i class="fas fa-share" aria-hidden="true"></i>
-      </a>
+      </div>
+
+      <script>
+        (function(){
+          try{
+            var selector = '.post-share[data-post-id="{{ include.post.id }}"]';
+            var el = document.querySelector(selector);
+            if (!el) return;
+            function invokeShare(){
+              var url = el.getAttribute('data-post-url') || window.location.href;
+              var title = el.getAttribute('data-post-title') || '';
+              if (window.createSharePopup && typeof window.createSharePopup === 'function'){
+                window.createSharePopup(el, { url: url, title: title });
+                return;
+              }
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(function(){ if (window.showToast) window.showToast('Link copied!'); }).catch(function(){ if (window.showToast) window.showToast('Copy failed'); });
+                return;
+              }
+              try{ var ta = document.createElement('textarea'); ta.value = url; ta.style.position='fixed'; ta.style.left='-9999px'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); if (window.showToast) window.showToast('Link copied!'); }catch(e){ if (window.showToast) window.showToast('Copy failed'); }
+            }
+            el.addEventListener('click', function(e){ e.preventDefault(); invokeShare(); });
+            el.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); invokeShare(); } });
+          }catch(e){}
+        })();
+      </script>
     </div>
   </div>
 

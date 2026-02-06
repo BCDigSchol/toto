@@ -131,10 +131,23 @@ layout: page
 
       // load YT API if not present
       function loadYouTubeAPI(cb){
-        if (window.YT && window.YT.Player) return cb && cb();
+        if (window.YT && window.YT.Player) {
+          if (cb) try{ cb(); }catch(e){}
+          return;
+        }
+        window.__YT_ready_callbacks = window.__YT_ready_callbacks || [];
+        if (cb) window.__YT_ready_callbacks.push(cb);
+        if (window.__YT_script_loading) return;
+        window.__YT_script_loading = true;
         var tag = document.createElement('script'); tag.src = 'https://www.youtube.com/iframe_api';
         var first = document.getElementsByTagName('script')[0]; first.parentNode.insertBefore(tag, first);
-        window.onYouTubeIframeAPIReady = function(){ if (cb) cb(); };
+        window.onYouTubeIframeAPIReady = function(){
+          try{
+            (window.__YT_ready_callbacks || []).forEach(function(f){ try{ f(); }catch(e){} });
+          }finally{
+            window.__YT_ready_callbacks = [];
+          }
+        };
       }
 
       var placeholders = Array.prototype.slice.call(document.querySelectorAll('.yt-placeholder'));
@@ -170,7 +183,19 @@ layout: page
               try{
                 var player = new YT.Player(pid, {
                   events: {
-                    'onReady': function(ev){ try{ ev.target.mute(); }catch(e){} },
+                    'onReady': function(ev){
+                      try{
+                        ev.target.mute();
+                        // if placeholder currently visible, start playback
+                        var rect = ph.getBoundingClientRect();
+                        var vh = (window.innerHeight || document.documentElement.clientHeight);
+                        var visible = Math.max(0, Math.min(rect.bottom, vh) - Math.max(rect.top, 0));
+                        var ratio = (rect.height > 0) ? (visible / rect.height) : 0;
+                        if (ratio >= 0.5) {
+                          try{ ev.target.playVideo(); }catch(e){}
+                        }
+                      }catch(e){}
+                    },
                     'onStateChange': function(state){ /* no-op */ }
                   }
                 });

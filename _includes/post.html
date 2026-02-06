@@ -1,6 +1,7 @@
 {%- assign files_raw = include.post.object_location | default: '' -%}
 {%- assign captions_raw = include.post.caption | default: '' -%}
 <article class="post-item w-full max-w-3xl box-border my-8 p-4 border rounded-lg shadow-sm" style="width:100%; max-width:880px;"
+  data-post-id="{{ include.post.id }}"
   data-subjects="{{ include.post.subjects | default: '' | downcase | escape }}"
   data-title="{{ include.post.title | default: '' | downcase | escape }}"
   data-files="{{ files_raw | downcase | escape }}"
@@ -38,9 +39,16 @@
     <h2 class="post-title text-2xl font-bold flex-1">
       <a href="{{ '/post' | append: '/' | append: include.post.id | relative_url }}" class="text-inherit no-underline">{{ include.post.title }}</a>
     </h2>
-    <a href="{{ '/post' | append: '/' | append: include.post.id | relative_url }}" class="post-share text-gray-600 hover:text-gray-800" title="Share" aria-label="Share">
-      <i class="fas fa-share" aria-hidden="true"></i>
-    </a>
+
+    <div style="display:flex;align-items:center;gap:.5rem;">
+      <button class="post-like" aria-label="Like post" title="Like" data-post-id="{{ include.post.id }}" style="background:transparent;border:none;cursor:pointer;padding:.25rem;line-height:0;color:inherit;">
+        <i class="far fa-heart" aria-hidden="true" style="font-size:1.15rem;color:inherit;"></i>
+      </button>
+
+      <a href="{{ '/post' | append: '/' | append: include.post.id | relative_url }}" class="post-share text-gray-600 hover:text-gray-800" title="Share" aria-label="Share">
+        <i class="fas fa-share" aria-hidden="true"></i>
+      </a>
+    </div>
   </div>
 
   {% if include.post.excerpt or include.post.description %}

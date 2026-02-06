@@ -17,6 +17,8 @@ theme-color: indigo # indigo|yellow|pink|green|stone|
 nav-menu:
   - title: Home
     link: index
+  - title: Favorites
+    link: index?favorites=true
   - title: About
     link: about
 

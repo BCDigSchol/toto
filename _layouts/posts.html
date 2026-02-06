@@ -35,6 +35,59 @@ layout: page
   })();
 </script>
 
+<script>
+  (function(){
+    // Manage like (favorite) state per-post using localStorage key 'favoriteIds' (JSON array of ids as strings)
+    try {
+      function readFavorites(){
+        try{ var v = localStorage.getItem('favoriteIds'); return v ? JSON.parse(v) : []; } catch(e){ return []; }
+      }
+      function writeFavorites(arr){ try{ localStorage.setItem('favoriteIds', JSON.stringify(arr)); }catch(e){} }
+
+      function isFav(id, list){ return list.indexOf(String(id)) !== -1; }
+
+      document.addEventListener('DOMContentLoaded', function(){
+        var favs = readFavorites();
+        var buttons = Array.prototype.slice.call(document.querySelectorAll('.post-like'));
+        buttons.forEach(function(btn){
+          var pid = btn.getAttribute('data-post-id') || (btn.closest && btn.closest('.post-item') && btn.closest('.post-item').getAttribute('data-post-id'));
+          if (!pid) return;
+          var icon = btn.querySelector('i');
+          if (!icon) return;
+          var setState = function(liked){
+            if (liked) {
+              icon.classList.remove('far'); icon.classList.add('fas');
+              btn.setAttribute('aria-pressed','true');
+              icon.style.color = '#ef4444';
+            } else {
+              icon.classList.remove('fas'); icon.classList.add('far');
+              btn.setAttribute('aria-pressed','false');
+              icon.style.color = '';
+            }
+          };
+
+          setState(isFav(pid, favs));
+
+          btn.addEventListener('click', function(e){
+            e.preventDefault();
+            favs = readFavorites();
+            var liked = isFav(pid, favs);
+            if (liked) {
+              // remove
+              favs = favs.filter(function(x){ return String(x) !== String(pid); });
+              setState(false);
+            } else {
+              favs.push(String(pid));
+              setState(true);
+            }
+            writeFavorites(favs);
+          });
+        });
+      });
+    } catch(e) { /* ignore */ }
+  })();
+</script>
+
 <!-- Image modal (click-to-expand) -->
 <div id="image-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;padding:1rem;">
   <button id="image-modal-close" aria-label="Close" style="position:absolute;top:1rem;right:1rem;background:transparent;border:none;color:#fff;font-size:1.5rem;cursor:pointer;">×</button>
@@ -318,6 +371,14 @@ layout: page
       var authorNameParam = params.get('author_name');
       var authorLastInitialParam = params.get('author_last_initial');
       var authorDepartmentParam = params.get('author_department');
+      var favoritesParam = params.get('favorites');
+      var favoritesActive = (favoritesParam === 'true' || favoritesParam === '1');
+      var favoriteIds = [];
+      if (favoritesActive) {
+        try { favoriteIds = JSON.parse(localStorage.getItem('favoriteIds') || '[]'); } catch(e){ favoriteIds = []; }
+        // normalize to strings
+        favoriteIds = (favoriteIds || []).map(function(x){ return String(x); });
+      }
 
       var subject = subjectParam ? subjectParam.toLowerCase() : null;
       var search = searchParam ? searchParam.toLowerCase() : null;
@@ -414,8 +475,14 @@ layout: page
           }
         }
 
+        var favoriteMatches = true;
+        if (favoritesActive) {
+          var pidAttr = item.getAttribute('data-post-id') || '';
+          favoriteMatches = favoriteIds.indexOf(String(pidAttr)) !== -1;
+        }
+
         // mark whether this item matched the current filters
-        if (subjectMatches && searchMatches && authorMatches && authorDeptMatches) {
+        if (subjectMatches && searchMatches && authorMatches && authorDeptMatches && favoriteMatches) {
           item.dataset.filtered = 'true';
           item.style.display = '';
           anyVisible = true;
@@ -430,7 +497,7 @@ layout: page
       function applyPagination(){
         var shown = 0;
         items.forEach(function(it){
-          if (it.dataset.filtered === 'true' || (subject===null && search===null && authorName===null && authorLastInitial===null && authorDepartment===null)){
+          if (it.dataset.filtered === 'true' || (subject===null && search===null && authorName===null && authorLastInitial===null && authorDepartment===null && !favoritesActive)){
             if (shown < INITIAL_SHOW) {
               it.style.display = '';
               shown++;
@@ -475,7 +542,7 @@ layout: page
         var toReveal = [];
         for (var i=0;i<items.length;i++){
           var it = items[i];
-          if ((it.dataset.filtered === 'true' || (subject===null && search===null && authorName===null && authorLastInitial===null && authorDepartment===null)) && it.style.display === 'none'){
+          if ((it.dataset.filtered === 'true' || (subject===null && search===null && authorName===null && authorLastInitial===null && authorDepartment===null && !favoritesActive)) && it.style.display === 'none'){
             toReveal.push(it);
             if (toReveal.length >= LOAD_BATCH) break;
           }

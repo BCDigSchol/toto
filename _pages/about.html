@@ -52,15 +52,57 @@ show-title: false
 </style>
 
 <style>
+	/* Mirror dark-mode rules when the site 'dark-theme' class is toggled */
+	body.dark-theme .about-hero h1,
+	body.dark-theme .about-hero h3,
+	body.dark-theme section h2 { color: #e6eef8 !important; }
+
+	body.dark-theme html, body { background: #041023 !important; color: #e6eef8 !important; }
+
+	body.dark-theme .about-hero p,
+	body.dark-theme section p,
+	body.dark-theme .about-hero ul,
+	body.dark-theme .about-hero li,
+	body.dark-theme .about-hero strong,
+	body.dark-theme .about-hero p[style],
+	body.dark-theme section p[style],
+	body.dark-theme .about-hero li[style],
+	body.dark-theme section li[style] { color: #cbd5e1 !important; }
+
+	body.dark-theme .about-hero [style],
+	body.dark-theme section [style] { background: transparent !important; color: #cbd5e1 !important; }
+
+	body.dark-theme .about-hero > div:nth-child(2) { background: #071023 !important; border-color: rgba(255,255,255,0.06) !important; box-shadow: none !important; }
+	body.dark-theme section { color: #cbd5e1 !important; }
+	body.dark-theme section div[style] { background: #071023 !important; border-color: rgba(255,255,255,0.06) !important; }
+
+	body.dark-theme a, body.dark-theme a:visited { color: #93c5fd !important; }
+	body.dark-theme a[style*="background:#0b5fff"] { background: #2563eb !important; color: #fff !important; }
+
+	body.dark-theme .about-hero p, body.dark-theme section p, body.dark-theme .about-hero ul { font-weight: 400; }
+</style>
+
+<style>
 	/* Dark mode tweaks for better contrast */
 	@media (prefers-color-scheme: dark) {
+		/* Set a dark page background and sensible default text color */
+		html, body { background: #041023 !important; color: #e6eef8 !important; }
+		/* Headings and section titles */
 		.about-hero h1, .about-hero h3, section h2 { color: #e6eef8 !important; }
-		.about-hero p, section p, .about-hero ul, .about-hero li, .about-hero strong { color: #cbd5e1 !important; }
-		.about-hero > div:nth-child(2) { background: #071023 !important; border-color: rgba(255,255,255,0.04) !important; box-shadow: none !important; }
+		/* Paragraphs, lists, and inline text — include selectors that match inline-styled elements */
+		.about-hero p, section p, .about-hero ul, .about-hero li, .about-hero strong,
+		.about-hero p[style], section p[style], .about-hero li[style], section li[style] { color: #cbd5e1 !important; }
+		/* Make sure any inline styles that set backgrounds or borders are neutralized for contrast */
+		.about-hero [style], section [style] { background: transparent !important; color: #cbd5e1 !important; }
+		/* Card styling */
+		.about-hero > div:nth-child(2) { background: #071023 !important; border-color: rgba(255,255,255,0.06) !important; box-shadow: none !important; }
 		section { color: #cbd5e1 !important; }
-		section div[style] { background: #071023 !important; border-color: rgba(255,255,255,0.04) !important; }
+		section div[style] { background: #071023 !important; border-color: rgba(255,255,255,0.06) !important; }
+		/* Links and buttons */
 		a, a:visited { color: #93c5fd !important; }
 		a[style*="background:#0b5fff"] { background: #2563eb !important; color: #fff !important; }
+		/* Increase contrast for small text */
+		.about-hero p, section p, .about-hero ul { font-weight: 400; }
 	}
 </style>
 

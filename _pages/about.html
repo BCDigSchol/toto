@@ -12,7 +12,7 @@ show-title: false
 
 		<p style="margin:0 0 1rem;color:#334155;line-height:1.6;"><strong>Created by the Boston College Digital Scholarship Group</strong>, the site collects guides, media, and links to support research, teaching, and digital projects.</p>
 
-		<a href="/index.html" style="display:inline-block;background:#0b5fff;color:#fff;padding:.6rem .9rem;border-radius:8px;text-decoration:none;font-weight:600;">Browse resources</a>
+		<a href="{{ site.baseurl }}/index.html" style="display:inline-block;background:#0b5fff;color:#fff;padding:.6rem .9rem;border-radius:8px;text-decoration:none;font-weight:600;">Browse resources</a>
 	</div>
 
 	<div style="min-width:180px;max-width:320px;background:#f8fafc;border-radius:12px;padding:1rem;border:1px solid rgba(2,6,23,0.04);box-shadow:0 6px 18px rgba(2,6,23,0.04);">
@@ -48,6 +48,19 @@ show-title: false
 	/* Small responsive tweaks for the about page */
 	@media (min-width: 1024px) {
 		.about-hero { align-items:flex-start; }
+	}
+</style>
+
+<style>
+	/* Dark mode tweaks for better contrast */
+	@media (prefers-color-scheme: dark) {
+		.about-hero h1, .about-hero h3, section h2 { color: #e6eef8 !important; }
+		.about-hero p, section p, .about-hero ul, .about-hero li, .about-hero strong { color: #cbd5e1 !important; }
+		.about-hero > div:nth-child(2) { background: #071023 !important; border-color: rgba(255,255,255,0.04) !important; box-shadow: none !important; }
+		section { color: #cbd5e1 !important; }
+		section div[style] { background: #071023 !important; border-color: rgba(255,255,255,0.04) !important; }
+		a, a:visited { color: #93c5fd !important; }
+		a[style*="background:#0b5fff"] { background: #2563eb !important; color: #fff !important; }
 	}
 </style>
 

@@ -62,44 +62,64 @@ layout: page
       if (!('IntersectionObserver' in window)) return;
       var vids = Array.prototype.slice.call(document.querySelectorAll('video'));
       var audios = Array.prototype.slice.call(document.querySelectorAll('audio'));
-      if (!vids.length && !audios.length) return;
-      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var audioAutoplayAllowed = sessionStorage.getItem('autoplayAudio') === '1';
 
-      // prepare media elements
-      vids.forEach(function(vid){ try{ vid.muted = true; vid.setAttribute('muted',''); }catch(e){}; vid._userPaused = false; vid.addEventListener('pause', function(){ if (!vid._autoPaused) { vid._userPaused = true; } }); vid.addEventListener('play', function(){ vid._userPaused = false; }); });
-      audios.forEach(function(a){ a._userPaused = false; a.addEventListener('pause', function(){ if (!a._autoPaused) { a._userPaused = true; } }); a.addEventListener('play', function(){ a._userPaused = false; }); });
+      // if audio autoplay isn't allowed yet, show a small opt-in control
+      if (!audioAutoplayAllowed && audios.length) {
+        try{
+          var b = document.createElement('div');
+          b.id = 'audio-autoplay-consent';
+          b.style.position = 'fixed';
+          b.style.right = '1rem';
+          b.style.bottom = '1rem';
+          b.style.zIndex = '10000';
+          b.style.background = 'rgba(255,255,255,0.95)';
+          b.style.border = '1px solid rgba(0,0,0,0.08)';
+          b.style.padding = '0.5rem';
+          b.style.borderRadius = '8px';
+          b.style.boxShadow = '0 6px 20px rgba(2,6,23,0.08)';
+          b.style.fontSize = '0.95rem';
+          b.innerHTML = '<div style="display:flex;gap:.5rem;align-items:center;"><button id="enable-audio-autoplay" style="background:#4f46e5;color:#fff;border:none;padding:.35rem .6rem;border-radius:6px;cursor:pointer;">Enable audio autoplay</button><button id="dismiss-audio-autoplay" style="background:transparent;border:none;color:#374151;cursor:pointer;">Dismiss</button></div>';
+          document.body.appendChild(b);
+          document.getElementById('enable-audio-autoplay').addEventListener('click', function(){ sessionStorage.setItem('autoplayAudio','1'); audioAutoplayAllowed = true; try{ document.body.removeChild(b); }catch(e){}; });
+          document.getElementById('dismiss-audio-autoplay').addEventListener('click', function(){ try{ document.body.removeChild(b); }catch(e){} });
+        }catch(e){}
+      }
+        if (!vids.length) return;
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-      var obs = new IntersectionObserver(function(entries){
-        entries.forEach(function(entry){
-          var target = entry.target;
-          // find a video or audio inside the observed target
-          var media = null;
-          if (target.tagName) {
-            var tname = target.tagName.toLowerCase();
-            if (tname === 'video' || tname === 'audio') media = target;
-          }
-          if (!media && target.querySelector) {
-            media = target.querySelector('video') || target.querySelector('audio');
-          }
-          if (!media) return;
+        // prepare video elements only; audio will NOT autoplay (opt-in only)
+        vids.forEach(function(vid){ try{ vid.muted = true; vid.setAttribute('muted',''); }catch(e){}; vid._userPaused = false; vid.addEventListener('pause', function(){ if (!vid._autoPaused) { vid._userPaused = true; } }); vid.addEventListener('play', function(){ vid._userPaused = false; }); });
 
-          if (entry.intersectionRatio >= 0.5) {
-            if (media._userPaused) return;
-            try{ if (media.tagName.toLowerCase() === 'video') { media.muted = true; media.setAttribute('muted',''); var p = media.play(); if (p && p.catch) p.catch(function(){}); }
-                  else if (media.tagName.toLowerCase() === 'audio') { // pause other audios
-                    audios.forEach(function(a){ if (a !== media && !a.paused) { a._autoPaused = true; a.pause(); a._autoPaused = false; } });
-                    var p = media.play(); if (p && p.catch) p.catch(function(){});
-                  }
-            } catch(e){}
-          } else {
-            try{ if (!media.paused) { media._autoPaused = true; media.pause(); media._autoPaused = false; } } catch(e){}
-          }
-        });
-      }, { threshold: [0,0.25,0.5,0.75,1] });
+        var obs = new IntersectionObserver(function(entries){
+          entries.forEach(function(entry){
+            var target = entry.target;
+            // find a video inside the observed target
+            var vid = null;
+            if (target.tagName) {
+              var tname = target.tagName.toLowerCase();
+              if (tname === 'video') vid = target;
+            }
+            if (!vid && target.querySelector) {
+              vid = target.querySelector('video');
+            }
+            if (!vid) return;
 
-      vids.concat(audios).forEach(function(m){ var target = m.closest && m.closest('.post-video') || m; obs.observe(target); });
+            // Debounce play/pause to avoid quick flicker when scrolling
+            if (entry.intersectionRatio >= 0.5) {
+              if (vid._userPaused) return;
+              if (vid._playTimer) clearTimeout(vid._playTimer);
+              vid._playTimer = setTimeout(function(){ try{ vid.muted = true; vid.setAttribute('muted',''); var p = vid.play(); if (p && p.catch) p.catch(function(){}); } catch(e){} }, 200);
+            } else {
+              if (vid._playTimer) { clearTimeout(vid._playTimer); vid._playTimer = null; }
+              try{ if (!vid.paused) { vid._autoPaused = true; vid.pause(); vid._autoPaused = false; } } catch(e){}
+            }
+          });
+        }, { threshold: [0,0.25,0.5,0.75,1] });
 
-      document.addEventListener('visibilitychange', function(){ if (document.hidden) { vids.concat(audios).forEach(function(m){ try{ m.pause(); }catch(e){} }); } });
+        vids.forEach(function(v){ var target = v.closest && v.closest('.post-video') || v; obs.observe(target); });
+
+        document.addEventListener('visibilitychange', function(){ if (document.hidden) { vids.forEach(function(m){ try{ m.pause(); }catch(e){} }); } });
 
       } catch(e) { }
   })();

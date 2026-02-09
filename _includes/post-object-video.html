@@ -37,6 +37,8 @@
   <script>
     (function(){
       try{
+        // If a global media autoplay manager is present, let it handle HTML5 videos
+        if (window.__mediaAutoplayManager) return;
         var vid = document.getElementById('video-{{ include.post.id | default: include.post.title | slugify }}');
         if (!vid) return;
         var can = '';

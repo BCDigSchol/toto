@@ -228,7 +228,7 @@ layout: page
       }
 
       var placeholders = Array.prototype.slice.call(document.querySelectorAll('.yt-placeholder'));
-      if (!placeholders.length) return;
+      // do not return if there are no YT placeholders; continue so local HTML5 videos are managed
 
       var toInit = [];
       placeholders.forEach(function(ph){ if (ph.getAttribute('data-yt-initialized') !== '1') toInit.push(ph); });
@@ -238,72 +238,115 @@ layout: page
       var ytPlayers = {}; // pid -> YT.Player
       var elToPid = new WeakMap();
 
+      // Also manage local HTML5 videos as part of the same autoplay system
+      window.__mediaAutoplayManager = window.__mediaAutoplayManager || {};
+      var html5Videos = [];
+      function registerHtml5Videos(){
+        try{
+          html5Videos = Array.prototype.slice.call(document.querySelectorAll('.post-video video'));
+          html5Videos.forEach(function(vid){
+            // track user pause/play so autoplay doesn't fight the user
+            vid._userPaused = false;
+            vid.addEventListener('pause', function(){ if (!vid._autoPaused) vid._userPaused = true; });
+            vid.addEventListener('play', function(){ vid._userPaused = false; });
+          });
+        }catch(e){ html5Videos = []; }
+      }
+      // register now and on DOM changes
+      registerHtml5Videos();
+      var _ma_timer = null;
+      try{ var _ma_observer = new MutationObserver(function(){ if (_ma_timer) clearTimeout(_ma_timer); _ma_timer = setTimeout(registerHtml5Videos, 200); }); _ma_observer.observe(document.body, { childList:true, subtree:true }); }catch(e){}
+
       var obs = new IntersectionObserver(function(entries){
         entries.forEach(function(entry){
-          var ph = entry.target;
-          var id = ph.getAttribute && ph.getAttribute('data-video-id');
-          if (!id) return;
-          var pid = 'yt-' + id + '-{{ include.post.id | default: include.post.title | slugify }}';
+          var target = entry.target;
+          // If this is a YT placeholder, handle via YT player flow
+          var isYT = target.getAttribute && target.getAttribute('data-video-id');
+          if (isYT) {
+            var ph = target;
+            var id = ph.getAttribute('data-video-id');
+            if (!id) return;
+            var pid = 'yt-' + id + '-{{ include.post.id | default: include.post.title | slugify }}';
 
-          // if not initialized, create iframe + player but continue observing
-          if (ph.getAttribute('data-yt-initialized') !== '1') {
-            var iframe = document.createElement('iframe');
-            iframe.setAttribute('id', pid);
-            iframe.setAttribute('src', 'https://www.youtube.com/embed/' + id + '?rel=0&modestbranding=1&enablejsapi=1');
-            iframe.setAttribute('frameborder', '0');
-            iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen');
-            iframe.setAttribute('allowfullscreen', '');
-            iframe.style.position = 'absolute'; iframe.style.top='0'; iframe.style.left='0'; iframe.style.width='100%'; iframe.style.height='100%';
-            ph.innerHTML = ''; ph.appendChild(iframe); ph.setAttribute('data-yt-initialized','1');
+            // if not initialized, create iframe + player but continue observing
+            if (ph.getAttribute('data-yt-initialized') !== '1') {
+              var iframe = document.createElement('iframe');
+              iframe.setAttribute('id', pid);
+              iframe.setAttribute('src', 'https://www.youtube.com/embed/' + id + '?rel=0&modestbranding=1&enablejsapi=1');
+              iframe.setAttribute('frameborder', '0');
+              iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen');
+              iframe.setAttribute('allowfullscreen', '');
+              iframe.style.position = 'absolute'; iframe.style.top='0'; iframe.style.left='0'; iframe.style.width='100%'; iframe.style.height='100%';
+              ph.innerHTML = ''; ph.appendChild(iframe); ph.setAttribute('data-yt-initialized','1');
 
-            loadYouTubeAPI(function(){
-              try{
-                var player = new YT.Player(pid, {
-                  events: {
-                    'onReady': function(ev){
-                      try{
-                        ev.target.mute();
-                        // if placeholder currently visible, start playback
-                        var rect = ph.getBoundingClientRect();
-                        var vh = (window.innerHeight || document.documentElement.clientHeight);
-                        var visible = Math.max(0, Math.min(rect.bottom, vh) - Math.max(rect.top, 0));
-                        var ratio = (rect.height > 0) ? (visible / rect.height) : 0;
-                        if (ratio >= 0.5) {
-                          try{ ev.target.playVideo(); }catch(e){}
-                        }
-                      }catch(e){}
-                    },
-                    'onStateChange': function(state){ /* no-op */ }
-                  }
-                });
-                ytPlayers[pid] = player;
-                elToPid.set(ph, pid);
-              } catch(e){}
-            });
+              loadYouTubeAPI(function(){
+                try{
+                  var player = new YT.Player(pid, {
+                    events: {
+                      'onReady': function(ev){
+                        try{
+                          ev.target.mute();
+                          // if placeholder currently visible, start playback
+                          var rect = ph.getBoundingClientRect();
+                          var vh = (window.innerHeight || document.documentElement.clientHeight);
+                          var visible = Math.max(0, Math.min(rect.bottom, vh) - Math.max(rect.top, 0));
+                          var ratio = (rect.height > 0) ? (visible / rect.height) : 0;
+                          if (ratio >= 0.5) {
+                            try{ ev.target.playVideo(); }catch(e){}
+                          }
+                        }catch(e){}
+                      },
+                      'onStateChange': function(state){ /* no-op */ }
+                    }
+                  });
+                  ytPlayers[pid] = player;
+                  elToPid.set(ph, pid);
+                } catch(e){}
+              });
+            }
+
+            var player = ytPlayers[pid];
+            if (entry.intersectionRatio >= 0.5) {
+              var playNow = function(){
+                try{
+                  // pause all other YT players
+                  for (var k in ytPlayers) { if (k !== pid && ytPlayers[k] && ytPlayers[k].pauseVideo) try{ ytPlayers[k].pauseVideo(); }catch(e){} }
+                  // pause all html5 videos
+                  html5Videos.forEach(function(v){ try{ if (!v.paused) { v._autoPaused = true; v.pause(); v._autoPaused = false; } }catch(e){} });
+                  if (ytPlayers[pid] && ytPlayers[pid].playVideo) try{ ytPlayers[pid].mute && ytPlayers[pid].mute(); ytPlayers[pid].playVideo(); }catch(e){}
+                }catch(e){}
+              };
+              if (player) playNow(); else { setTimeout(function(){ if (ytPlayers[pid]) playNow(); }, 250); }
+            } else {
+              if (player && player.pauseVideo) try{ player.pauseVideo(); }catch(e){}
+            }
+            return; // handled
           }
 
-          // If element is visible enough, play its player and pause others; otherwise pause it
-          var player = ytPlayers[pid];
+          // Otherwise, handle HTML5 video elements
+          var vid = null;
+          if (target.tagName === 'VIDEO') vid = target; else if (target.querySelector) vid = target.querySelector('video');
+          if (!vid) return;
+          // Respect user pause
           if (entry.intersectionRatio >= 0.5) {
-            // try to ensure player exists; if not, schedule later (API will mute onReady)
-            var playNow = function(){
-              try{
-                // pause all other YT players
-                for (var k in ytPlayers) { if (k !== pid && ytPlayers[k] && ytPlayers[k].pauseVideo) try{ ytPlayers[k].pauseVideo(); }catch(e){} }
-                if (ytPlayers[pid] && ytPlayers[pid].playVideo) try{ ytPlayers[pid].mute && ytPlayers[pid].mute(); ytPlayers[pid].playVideo(); }catch(e){}
-              }catch(e){}
-            };
-            if (player) playNow(); else {
-              // try again shortly in case player hasn't been created yet
-              setTimeout(function(){ if (ytPlayers[pid]) playNow(); }, 250);
-            }
+            if (vid._userPaused) return;
+            try{
+              // pause YT players
+              for (var k2 in ytPlayers) { if (ytPlayers[k2] && ytPlayers[k2].pauseVideo) try{ ytPlayers[k2].pauseVideo(); }catch(e){} }
+              // pause other html5 videos
+              html5Videos.forEach(function(v){ if (v !== vid) { try{ if (!v.paused) { v._autoPaused = true; v.pause(); v._autoPaused = false; } }catch(e){} } });
+              // play this one muted
+              try{ vid.muted = true; vid.setAttribute('muted',''); var p = vid.play(); if (p && p.catch) p.catch(function(){}); }catch(e){}
+            }catch(e){}
           } else {
-            if (player && player.pauseVideo) try{ player.pauseVideo(); }catch(e){}
+            try{ if (!vid.paused) { vid._autoPaused = true; vid.pause(); vid._autoPaused = false; } }catch(e){}
           }
         });
       }, { threshold: [0,0.25,0.5,0.75,1] });
 
       toInit.forEach(function(ph){ var target = ph.closest && ph.closest('.post-video') || ph; obs.observe(target); });
+      // observe registered HTML5 videos as well
+      try{ html5Videos.forEach(function(v){ var t = v.closest && v.closest('.post-video') || v; obs.observe(t); }); }catch(e){}
 
     } catch(e){ }
   })();

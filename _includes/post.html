@@ -36,6 +36,8 @@
     {% include post-object-html.html post=include.post %}
   {%- elsif include.post.object_type == "youtube" -%}
     {% include post-object-youtube.html post=include.post %}
+  {%- elsif include.post.object_type == "3d" -%}
+    {% include post-object-3d.html post=include.post %}
   {%- elsif include.post.object_type == "direct-link" -%}
     {% include post-object-direct-link.html post=include.post %}
   {%- elsif include.post.object_type == "gallery" -%}

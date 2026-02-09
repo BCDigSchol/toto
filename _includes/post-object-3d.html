@@ -1,0 +1,123 @@
+{%- assign obj = include.post.object_location | default: "" -%}
+{%- if obj != "" -%}
+  {%- assign obj_url = '/objects/' | append: obj | relative_url -%}
+
+  <div class="post-3d mb-4 rounded overflow-hidden border" style="max-height:480px;background:#fff;padding:0.25rem;">
+    <div id="three-wrapper-{{ include.post.id | default: include.post.title | slugify }}" style="position:relative; width:100%;height:420px;background:#ffffff;border-radius:6px;overflow:hidden;">
+      <div id="three-loader-{{ include.post.id | default: include.post.title | slugify }}" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:10;color:#334155;">Loading 3D object…</div>
+      <div id="threejs-container-{{ include.post.id | default: include.post.title | slugify }}" style="width:100%;height:100%;"></div>
+    </div>
+    {% if include.post.caption %}
+      <div class="video-caption text-sm text-gray-600 mt-2">{{ include.post.caption }}</div>
+    {% endif %}
+    <div style="display:none;margin-top:.5rem;color:#000;" id="three-fallback-{{ include.post.id | default: include.post.title | slugify }}">
+      <p>Unable to render 3D object. <a href="{{ obj_url }}" style="color:#0f62fe;">Download</a> or try a modern browser.</p>
+      <pre id="three-debug-{{ include.post.id | default: include.post.title | slugify }}" style="white-space:pre-wrap;color:#722;display:none;margin-top:.5rem;background:#fff7f7;padding:.5rem;border-radius:4px;border:1px solid #f2c2c2;font-size:0.9rem;"></pre>
+    </div>
+  </div>
+
+  <!-- Use jsDelivr for three.js core and matching example loaders (stable 0.126.1 used by working template) -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.126.1/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.126.1/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.126.1/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.126.1/examples/js/loaders/STLLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.126.1/examples/js/loaders/OBJLoader.js"></script>
+
+  <script>
+    (function(){
+      try{
+        var containerId = 'threejs-container-{{ include.post.id | default: include.post.title | slugify }}';
+        var loaderId = 'three-loader-{{ include.post.id | default: include.post.title | slugify }}';
+        var fallbackId = 'three-fallback-{{ include.post.id | default: include.post.title | slugify }}';
+        var debugId = 'three-debug-{{ include.post.id | default: include.post.title | slugify }}';
+        var container = document.getElementById(containerId);
+        var loaderEl = document.getElementById(loaderId);
+        var fallbackEl = document.getElementById(fallbackId);
+        var debugEl = document.getElementById(debugId);
+        if (!container) return;
+
+        var modelFile = '{{ obj_url }}';
+        function getExt(u){ try{ return (u.split('.').pop()||'').toLowerCase(); }catch(e){return '';}}
+        var ext = getExt(modelFile);
+
+        var scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xFFFFFF);
+        var camera = new THREE.PerspectiveCamera(60, Math.max(1, container.clientWidth)/Math.max(1, container.clientHeight), 0.1, 1000);
+        // Start slightly above and to the side so the model is viewed from a gentle angle
+        camera.position.set(1.2, 0.8, 5);
+        var renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
+
+        var controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; controls.dampingFactor = 0.07;
+        // Autorotate by default; disable permanently if the user interacts
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 1.0;
+        var _threeUserInteracted = false;
+        function _disableAutoRotate(){
+          if (!_threeUserInteracted) { _threeUserInteracted = true; try{ controls.autoRotate = false; }catch(e){} }
+        }
+        // OrbitControls emits 'start' when user begins interacting
+        if (typeof controls.addEventListener === 'function') controls.addEventListener('start', _disableAutoRotate);
+        // Also listen for direct pointer interaction on the canvas as a fallback
+        try{ renderer.domElement.addEventListener('pointerdown', _disableAutoRotate, {passive:true}); }catch(e){}
+
+        var hemi = new THREE.HemisphereLight(0xffeeb1, 0x080820, 1);
+        scene.add(hemi);
+        var dir = new THREE.DirectionalLight(0xffffff, 0.6); dir.position.set(5,10,7.5); scene.add(dir);
+
+        function fitCameraToObject(camera, object, offset){
+          offset = offset || 1.5;
+          var box = new THREE.Box3().setFromObject(object);
+          var size = box.getSize(new THREE.Vector3());
+          var center = box.getCenter(new THREE.Vector3());
+          var maxDim = Math.max(size.x, size.y, size.z);
+          var fov = camera.fov * (Math.PI/180);
+          var cameraZ = Math.abs(maxDim / 2 / Math.tan(fov/2)) * offset;
+          // Position camera slightly to the side (+x) and above (+y) of the model center
+          var sideOffset = (maxDim || 1) * 0.45;
+          var aboveOffset = (maxDim || 1) * 0.25;
+          camera.position.set(center.x + sideOffset, center.y + aboveOffset, cameraZ);
+          camera.lookAt(center);
+          camera.updateProjectionMatrix();
+        }
+
+        function showError(err){
+          try{
+            if (loaderEl) loaderEl.style.display = 'none';
+            if (fallbackEl) fallbackEl.style.display = 'block';
+            if (debugEl) { debugEl.style.display = 'block'; debugEl.textContent = err && err.message ? err.message : (typeof err === 'string' ? err : JSON.stringify(err)); }
+            console.error('three include error', err);
+          }catch(e){}
+        }
+
+        function hideLoader(){ try{ if (loaderEl) loaderEl.style.display = 'none'; }catch(e){} }
+
+        if (ext === 'glb' || ext === 'gltf'){
+          try{
+            var loader = new THREE.GLTFLoader();
+            loader.load(modelFile, function(gltf){ scene.add(gltf.scene); fitCameraToObject(camera, gltf.scene, 1.5); hideLoader(); }, undefined, function(err){ showError(err || 'GLTF load error'); });
+          }catch(e){ showError(e); }
+        } else if (ext === 'stl'){
+          try{
+            var stl = new THREE.STLLoader();
+            stl.load(modelFile, function(geometry){ var mat = new THREE.MeshStandardMaterial({ color:0x888888 }); var mesh = new THREE.Mesh(geometry, mat); scene.add(mesh); fitCameraToObject(camera, mesh, 1.5); hideLoader(); }, undefined, function(err){ showError(err || 'STL load error'); });
+          }catch(e){ showError(e); }
+        } else if (ext === 'obj'){
+          try{
+            var objl = new THREE.OBJLoader();
+            objl.load(modelFile, function(obj){ scene.add(obj); fitCameraToObject(camera, obj, 1.5); hideLoader(); }, undefined, function(err){ showError(err || 'OBJ load error'); });
+          }catch(e){ showError(e); }
+        } else {
+          showError('Unsupported model type: ' + ext);
+        }
+
+        function animate(){ requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
+        animate();
+
+        window.addEventListener('resize', function(){ try{ var w = container.clientWidth||640; var h = container.clientHeight||420; camera.aspect = w/h; camera.updateProjectionMatrix(); renderer.setSize(w,h); }catch(e){} });
+      }catch(e){ try{ console.error('three include init error', e); }catch(ignore){} }
+    })();
+  </script>
+{%- endif -%}

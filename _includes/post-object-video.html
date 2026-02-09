@@ -92,8 +92,13 @@
               if (entry.intersectionRatio >= 0.5) {
                 if (vid.dataset.userPaused) return;
                 try { vid.muted = true; vid.setAttribute('muted', ''); } catch(e){}
-                var p = vid.play();
-                if (p && p.catch) p.catch(function(){});
+                try {
+                  if (window.tryPlayWhenBuffered) {
+                    window.tryPlayWhenBuffered(vid, 4000).catch(function(){});
+                  } else {
+                    var p = vid.play(); if (p && p.catch) p.catch(function(){});
+                  }
+                } catch(e){}
               } else {
                 if (!vid.paused) { vid._autoPaused = true; vid.pause(); vid._autoPaused = false; }
               }

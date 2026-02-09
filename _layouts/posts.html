@@ -184,7 +184,7 @@ layout: page
             if (entry.intersectionRatio >= 0.5) {
               if (vid._userPaused) return;
               if (vid._playTimer) clearTimeout(vid._playTimer);
-              vid._playTimer = setTimeout(function(){ try{ vid.muted = true; vid.setAttribute('muted',''); var p = vid.play(); if (p && p.catch) p.catch(function(){ try{ showToast('Autoplay blocked — tap to play'); }catch(e){} }); } catch(e){} }, 200);
+              vid._playTimer = setTimeout(function(){ try{ vid.muted = true; vid.setAttribute('muted',''); tryPlayWhenBuffered(vid, 4000).catch(function(){ try{ showToast('Autoplay blocked — tap to play'); }catch(e){} }); } catch(e){} }, 200);
             } else {
               if (vid._playTimer) { clearTimeout(vid._playTimer); vid._playTimer = null; }
               try{ if (!vid.paused) { vid._autoPaused = true; vid.pause(); vid._autoPaused = false; } } catch(e){}
@@ -261,6 +261,47 @@ layout: page
       }
       // register now and on DOM changes
       registerHtml5Videos();
+      
+      // helper: attempt to play a video but wait until it's buffered enough to avoid play() rejections
+      function tryPlayWhenBuffered(vid, timeout){
+        timeout = typeof timeout === 'number' ? timeout : 4000;
+        return new Promise(function(resolve, reject){
+          try{
+            if (!vid) return reject(new Error('no-video'));
+            // ensure attributes for muted autoplay
+            try{ vid.setAttribute('playsinline',''); vid.setAttribute('muted',''); vid.muted = true; }catch(e){}
+
+            var fired = false;
+            function cleanup(){
+              try{ vid.removeEventListener('canplay', onCan); vid.removeEventListener('canplaythrough', onCan); }catch(e){}
+              if (timer) { clearTimeout(timer); timer = null; }
+            }
+            function attemptPlay(){
+              if (fired) return;
+              fired = true;
+              try{
+                var p = vid.play();
+                if (p && p.then) {
+                  p.then(function(){ cleanup(); resolve(); }).catch(function(err){ cleanup(); reject(err); });
+                } else {
+                  cleanup(); resolve();
+                }
+              }catch(err){ cleanup(); reject(err); }
+            }
+            function onCan(){ attemptPlay(); }
+
+            // if already buffered sufficiently, try immediately
+            try{
+              if (vid.readyState >= 3) { attemptPlay(); return; }
+            }catch(e){}
+
+            vid.addEventListener('canplay', onCan);
+            vid.addEventListener('canplaythrough', onCan);
+            var timer = setTimeout(function(){ attemptPlay(); }, timeout);
+          }catch(err){ reject(err); }
+        });
+      }
+      try{ window.tryPlayWhenBuffered = tryPlayWhenBuffered; }catch(e){}
       var _ma_timer = null;
       try{ var _ma_observer = new MutationObserver(function(){ if (_ma_timer) clearTimeout(_ma_timer); _ma_timer = setTimeout(registerHtml5Videos, 200); }); _ma_observer.observe(document.body, { childList:true, subtree:true }); }catch(e){}
 
@@ -343,7 +384,7 @@ layout: page
               // pause other html5 videos
               html5Videos.forEach(function(v){ if (v !== vid) { try{ if (!v.paused) { v._autoPaused = true; v.pause(); v._autoPaused = false; } }catch(e){} } });
               // play this one muted
-              try{ vid.muted = true; vid.setAttribute('muted',''); var p = vid.play(); if (p && p.catch) p.catch(function(){ try{ showToast('Autoplay blocked — tap to play'); }catch(e){} }); }catch(e){}
+              try{ vid.muted = true; vid.setAttribute('muted',''); tryPlayWhenBuffered(vid, 4000).catch(function(){ try{ showToast('Autoplay blocked — tap to play'); }catch(e){} }); }catch(e){}
             }catch(e){}
           } else {
             try{ if (!vid.paused) { vid._autoPaused = true; vid.pause(); vid._autoPaused = false; } }catch(e){}

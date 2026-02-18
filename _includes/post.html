@@ -22,6 +22,16 @@
       .post-excerpt, .post-excerpt[style] { color: #cbd5e1 !important; }
       .post-item[style] { background: transparent !important; }
     }
+    /* Reduce vertical spacing between title and description */
+    .post-title-row { margin-bottom: 0 !important; padding-bottom: 0 !important; }
+    /* Shrink all vertical space around description */
+    .post-excerpt {
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      line-height: 1.8 !important;
+    }
   </style>
 
   {%- if include.post.object_type == "image" -%}
@@ -48,7 +58,7 @@
     {%- endif -%}
   {%- endif -%}
 
-  <div class="post-title-row w-full flex items-center justify-between mb-2">
+  <div class="post-title-row w-full flex items-center justify-between" style="margin-bottom:0;padding-bottom:0;">
     <h2 class="post-title text-2xl font-bold flex-1">
       <a href="{{ '/post' | append: '/' | append: include.post.id | relative_url }}" class="text-inherit no-underline">{{ include.post.title }}</a>
     </h2>
@@ -93,7 +103,7 @@
   </div>
 
   {% if include.post.excerpt or include.post.description %}
-  <p class="post-excerpt text-base text-gray-800 dark:text-gray-200 mb-4">{{ include.post.excerpt | default: include.post.description }}</p>
+  <p class="post-excerpt text-base text-gray-800 dark:text-gray-200" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0;line-height:1.2;">{{ include.post.excerpt | default: include.post.description }}</p>
   {% endif %}
 
   <footer class="post-meta text-sm text-gray-600">

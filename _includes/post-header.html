@@ -16,7 +16,7 @@
         {%- assign name_parts = include.post.author_name | default: "" | split: " " -%}
         {%- assign first_initial = name_parts | first | default: "" | slice: 0, 1 -%}
         {%- if include.post.author_last_initial and include.post.author_last_initial != "" -%}
-          {%- assign last_initial = include.post.author_last_initial -%}
+          {%- assign last_initial = include.post.author_last_initial | slice: 0, 1 -%}
         {%- else -%}
           {%- assign last_initial = name_parts | last | default: "" | slice: 0, 1 -%}
         {%- endif -%}
